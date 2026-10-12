@@ -1,0 +1,2212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="theme-color" content="#0082C8" />
+<title>PhysicsLab 3D — Master Every Physics Concept</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --accent:#0082C8;--accent-2:#33A9E8;--accent-3:#00C2FF;
+    --accent-dim:rgba(0,130,200,.16);--accent-glow:rgba(0,130,200,.45);
+    --bg:#070b10;--bg-2:#0b1218;--panel:rgba(9,15,21,.78);
+    --brd:rgba(255,255,255,.085);--txt:#e9f2f9;--dim:#8ba4ba;--dim-2:#5d7488;
+    --radius:16px;--ok:#22c55e;--warn:#f59e0b;--danger:#ef4444;
+  }
+  html,body{height:100%;overflow:hidden}
+  body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--txt);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  ::selection{background:var(--accent);color:#fff}
+  button{font-family:inherit}
+  a{color:inherit}
+
+  #app{display:grid;grid-template-columns:270px 1fr;height:100vh;height:100dvh;overflow:hidden}
+
+  .sidebar{background:linear-gradient(180deg,#0b1319 0%,#070b10 100%);border-right:1px solid var(--brd);display:flex;flex-direction:column;overflow:hidden;position:relative;z-index:20}
+  .sidebar::after{content:'';position:absolute;top:0;right:0;width:1px;height:100%;background:linear-gradient(180deg,transparent,var(--accent-glow),transparent);opacity:.5;pointer-events:none}
+
+  .brand{display:flex;align-items:center;gap:11px;padding:16px 16px 12px;flex-shrink:0}
+  .brand-mark{width:38px;height:38px;border-radius:11px;flex-shrink:0;background:linear-gradient(135deg,var(--accent),var(--accent-3));display:grid;place-items:center;font-size:19px;box-shadow:0 6px 22px rgba(0,130,200,.45);animation:pulseGlow 4s ease-in-out infinite}
+  @keyframes pulseGlow{0%,100%{box-shadow:0 6px 22px rgba(0,130,200,.35)}50%{box-shadow:0 6px 30px rgba(0,130,200,.7)}}
+  .brand-name{font-size:15px;font-weight:800;letter-spacing:-.2px}
+  .brand-sub{font-size:10px;color:var(--dim-2);font-weight:600;letter-spacing:.6px;text-transform:uppercase;margin-top:1px}
+
+  .search-wrap{padding:0 12px 8px;flex-shrink:0}
+  .search-box{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.045);border:1px solid var(--brd);border-radius:11px;padding:8px 11px;transition:all .2s;cursor:text}
+  .search-box:focus-within{border-color:rgba(0,130,200,.55);background:var(--accent-dim);box-shadow:0 0 0 3px rgba(0,130,200,.1)}
+  .search-box svg{color:var(--dim-2);flex-shrink:0}
+  .search-box input{flex:1;background:none;border:none;color:var(--txt);font-size:12.5px;outline:none;font-family:inherit;min-width:0}
+  .search-box input::placeholder{color:var(--dim-2)}
+
+  .cat-chips{display:flex;gap:5px;padding:0 12px 10px;overflow-x:auto;flex-shrink:0;scrollbar-width:none}
+  .cat-chips::-webkit-scrollbar{display:none}
+  .chip{flex-shrink:0;font-size:10.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;padding:5px 10px;border-radius:20px;background:rgba(255,255,255,.04);border:1px solid var(--brd);color:var(--dim-2);cursor:pointer;transition:all .18s;white-space:nowrap;font-family:inherit}
+  .chip:hover{color:var(--txt);background:rgba(255,255,255,.07)}
+  .chip.active{background:var(--accent-dim);border-color:rgba(0,130,200,.5);color:#fff}
+
+  .nav-label{font-size:10px;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;color:var(--dim-2);padding:4px 20px 8px;display:flex;justify-content:space-between;align-items:center}
+  .nav-label .cnt{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--dim-2);font-weight:600}
+
+  .nav{flex:1;overflow-y:auto;padding:0 10px 10px;display:flex;flex-direction:column;gap:2px;min-height:0}
+  .nav::-webkit-scrollbar{width:5px}
+  .nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,.09);border-radius:4px}
+  .nav::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+
+  /* FIX: outer element is now a div, not a button (nested buttons are invalid HTML) */
+  .nav-item{display:flex;align-items:center;gap:10px;width:100%;padding:8px 10px;border-radius:11px;background:transparent;color:var(--dim);font-size:12.8px;font-weight:550;cursor:pointer;text-align:left;position:relative;transition:background .18s,color .18s,transform .18s;flex-shrink:0;user-select:none}
+  .nav-item:hover{background:rgba(255,255,255,.055);color:var(--txt)}
+  .nav-item:active{transform:scale(.985)}
+  .nav-item.active{background:var(--accent-dim);color:#fff}
+  .nav-item.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:18px;border-radius:0 3px 3px 0;background:var(--accent);box-shadow:0 0 12px var(--accent-glow)}
+  .nav-icon{font-size:15px;width:20px;text-align:center;flex-shrink:0;line-height:1}
+  .nav-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}
+  .nav-check{color:var(--ok);font-size:12px;flex-shrink:0;opacity:.9}
+  .nav-fav{color:var(--warn);font-size:11px;flex-shrink:0;background:none;border:none;cursor:pointer;padding:2px 3px;line-height:1;opacity:.35;transition:opacity .2s,transform .2s}
+  .nav-fav:hover{opacity:1;transform:scale(1.25)}
+  .nav-fav.on{opacity:1}
+  .nav-empty{color:var(--dim-2);font-size:12px;text-align:center;padding:24px 12px;font-style:italic}
+
+  .sidebar-foot{padding:10px 12px;border-top:1px solid var(--brd);display:flex;flex-direction:column;gap:6px;flex-shrink:0}
+  .side-link{display:flex;align-items:center;gap:9px;padding:7px 11px;border-radius:10px;background:rgba(255,255,255,.035);border:1px solid var(--brd);color:var(--dim);text-decoration:none;font-size:12px;font-weight:600;transition:all .2s;cursor:pointer;font-family:inherit;width:100%}
+  .side-link:hover{background:var(--accent-dim);border-color:rgba(0,130,200,.4);color:#fff;transform:translateX(2px)}
+  .side-link.yt:hover{color:#ff6b6b;border-color:rgba(255,68,68,.45);background:rgba(255,68,68,.1)}
+  .side-link svg{flex-shrink:0}
+  .credit{font-size:10px;color:var(--dim-2);text-align:center;padding-top:2px;font-weight:500}
+
+  .main{display:flex;flex-direction:column;overflow:hidden;position:relative;min-width:0}
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:10px 16px;border-bottom:1px solid var(--brd);background:rgba(9,15,21,.62);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);flex-shrink:0;z-index:10}
+  .tb-left{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
+  .tag{font-size:10px;font-weight:800;letter-spacing:.7px;text-transform:uppercase;color:var(--accent-2);background:var(--accent-dim);border:1px solid rgba(0,130,200,.3);padding:4px 9px;border-radius:20px;white-space:nowrap;flex-shrink:0}
+  h1{font-size:16px;font-weight:750;letter-spacing:-.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tb-right{display:flex;align-items:center;gap:7px;flex-shrink:0}
+
+  .icon-btn{width:34px;height:34px;border-radius:10px;border:1px solid var(--brd);background:rgba(255,255,255,.04);color:var(--dim);cursor:pointer;font-size:14px;display:grid;place-items:center;transition:all .18s;position:relative}
+  .icon-btn:hover{background:var(--accent-dim);border-color:rgba(0,130,200,.45);color:#fff}
+  .icon-btn:active{transform:scale(.94)}
+  .icon-btn.active{background:var(--accent-dim);border-color:rgba(0,130,200,.55);color:#fff}
+
+  .link-btn{display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:10px;font-size:12px;font-weight:650;text-decoration:none;border:1px solid var(--brd);background:rgba(255,255,255,.04);color:var(--dim);transition:all .2s;white-space:nowrap}
+  .link-btn:hover{transform:translateY(-1px)}
+  .link-btn.yt:hover{background:rgba(255,0,0,.14);border-color:rgba(255,68,68,.5);color:#ff6b6b}
+  .link-btn.gh:hover{background:var(--accent-dim);border-color:rgba(0,130,200,.5);color:#fff}
+
+  .stage{position:relative;flex:1;min-height:0;overflow:hidden;background:radial-gradient(130% 95% at 50% -5%,#12242f 0%,#0a1219 45%,#05080b 100%)}
+  #gl{display:block;width:100%;height:100%;outline:none;touch-action:none}
+  .stage::before{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(90% 70% at 50% 50%,transparent 45%,rgba(0,0,0,.5) 100%)}
+
+  .panel{position:absolute;z-index:5;background:var(--panel);backdrop-filter:blur(16px) saturate(150%);-webkit-backdrop-filter:blur(16px) saturate(150%);border:1px solid var(--brd);border-radius:var(--radius);box-shadow:0 12px 44px rgba(0,0,0,.55);animation:panelIn .45s cubic-bezier(.22,1,.36,1) both}
+  @keyframes panelIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+  .info-panel{left:16px;bottom:16px;width:392px;max-width:calc(100% - 32px);padding:14px 16px 13px}
+  .info-panel p{font-size:12.4px;line-height:1.55;color:var(--dim);margin-bottom:10px}
+  .formula{font-family:'JetBrains Mono',monospace;font-size:11.6px;font-weight:600;color:var(--accent-2);background:rgba(0,130,200,.1);border:1px solid rgba(0,130,200,.22);border-radius:10px;padding:9px 12px;letter-spacing:.2px;overflow-x:auto;white-space:nowrap}
+  .formula::-webkit-scrollbar{height:3px}
+  .formula::-webkit-scrollbar-thumb{background:rgba(0,130,200,.4);border-radius:3px}
+  .ro-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px}
+  .ro{display:flex;flex-direction:column;gap:2px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.055);border-radius:9px;padding:7px 9px}
+  .ro-k{font-size:9.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--dim-2)}
+  .ro-v{font-family:'JetBrains Mono',monospace;font-size:12.4px;font-weight:600;color:var(--accent-2)}
+
+  .controls-panel{right:16px;top:16px;width:258px;padding:14px 15px 15px;max-height:calc(100% - 32px);overflow-y:auto}
+  .controls-panel::-webkit-scrollbar{width:5px}
+  .controls-panel::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:4px}
+  .controls-panel::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+  .ctrl-title{font-size:9.8px;font-weight:800;letter-spacing:1.1px;text-transform:uppercase;color:var(--dim-2);margin-bottom:12px;display:flex;align-items:center;gap:7px}
+  .ctrl-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--brd),transparent)}
+  .ctrl{margin-bottom:14px}
+  .ctrl:last-child{margin-bottom:0}
+  .ctrl-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px;gap:8px}
+  .ctrl-head span:first-child{font-size:11.6px;font-weight:600;color:var(--dim)}
+  .ctrl-val{font-family:'JetBrains Mono',monospace;font-size:11.4px;font-weight:600;color:var(--accent-2);white-space:nowrap}
+
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:4px;background:linear-gradient(90deg,var(--accent) 0%,var(--accent) var(--p,50%),rgba(255,255,255,.1) var(--p,50%),rgba(255,255,255,.1) 100%);outline:none;cursor:pointer}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:14px;height:14px;border-radius:50%;background:#fff;border:3px solid var(--accent);cursor:grab;box-shadow:0 0 0 0 var(--accent-glow);transition:box-shadow .2s,transform .15s}
+  input[type=range]::-webkit-slider-thumb:hover{box-shadow:0 0 0 7px rgba(0,130,200,.16);transform:scale(1.12)}
+  input[type=range]::-webkit-slider-thumb:active{cursor:grabbing;transform:scale(1.05)}
+  input[type=range]::-moz-range-thumb{width:13px;height:13px;border-radius:50%;background:#fff;border:3px solid var(--accent);cursor:grab}
+  input[type=range]::-moz-range-track{height:4px;border-radius:4px;background:rgba(255,255,255,.1)}
+
+  .hint{position:absolute;bottom:16px;right:16px;z-index:4;font-size:10.4px;color:var(--dim-2);font-weight:600;letter-spacing:.3px;background:rgba(9,15,21,.6);backdrop-filter:blur(10px);padding:7px 12px;border-radius:20px;border:1px solid var(--brd);pointer-events:none;user-select:none}
+
+  .drawer-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);z-index:40;opacity:0;pointer-events:none;transition:opacity .25s}
+  .drawer-backdrop.show{opacity:1;pointer-events:auto}
+  .drawer{position:fixed;top:0;right:0;bottom:0;width:310px;max-width:90vw;background:linear-gradient(180deg,#0c161d,#070b10);border-left:1px solid var(--brd);z-index:41;transform:translateX(100%);transition:transform .32s cubic-bezier(.22,1,.36,1);display:flex;flex-direction:column;box-shadow:-20px 0 60px rgba(0,0,0,.6)}
+  .drawer.open{transform:translateX(0)}
+  .drawer-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--brd)}
+  .drawer-head h3{font-size:14px;font-weight:700;letter-spacing:-.2px;display:flex;align-items:center;gap:9px}
+  .drawer-head h3 svg{color:var(--accent)}
+  .drawer-body{flex:1;overflow-y:auto;padding:16px 18px}
+  .drawer-body::-webkit-scrollbar{width:5px}
+  .drawer-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:4px}
+  .setting-section{margin-bottom:22px}
+  .setting-section h4{font-size:10px;font-weight:800;letter-spacing:1.1px;text-transform:uppercase;color:var(--dim-2);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+  .setting-section h4::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--brd),transparent)}
+  .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:9px 11px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid var(--brd);margin-bottom:6px;cursor:pointer;transition:background .2s}
+  .toggle-row:hover{background:rgba(255,255,255,.06)}
+  .toggle-label{font-size:12.4px;font-weight:550;color:var(--txt)}
+  .toggle{position:relative;width:36px;height:20px;border-radius:20px;background:rgba(255,255,255,.14);transition:background .2s;flex-shrink:0}
+  .toggle::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .22s cubic-bezier(.22,1,.36,1)}
+  .toggle.on{background:var(--accent)}
+  .toggle.on::after{transform:translateX(16px)}
+  .speed-row{display:flex;gap:5px;margin-top:4px}
+  .speed-btn{flex:1;padding:7px 0;border-radius:9px;background:rgba(255,255,255,.04);border:1px solid var(--brd);color:var(--dim);font-size:11.5px;font-weight:650;cursor:pointer;transition:all .18s;font-family:inherit}
+  .speed-btn:hover{color:var(--txt);background:rgba(255,255,255,.07)}
+  .speed-btn.on{background:var(--accent-dim);border-color:rgba(0,130,200,.5);color:#fff}
+  .danger-btn{width:100%;padding:10px;border-radius:10px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#fca5a5;font-size:12px;font-weight:650;cursor:pointer;transition:all .2s;margin-top:4px;font-family:inherit}
+  .danger-btn:hover{background:rgba(239,68,68,.2);color:#fff}
+
+  .modal-backdrop{position:fixed;inset:0;background:rgba(3,7,11,.82);backdrop-filter:blur(8px);z-index:50;display:grid;place-items:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .25s}
+  .modal-backdrop.show{opacity:1;pointer-events:auto}
+  .modal{background:linear-gradient(180deg,#0c161d,#070b10);border:1px solid var(--brd);border-radius:20px;width:100%;max-width:820px;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 30px 90px rgba(0,0,0,.7);transform:scale(.94);transition:transform .3s cubic-bezier(.22,1,.36,1);overflow:hidden}
+  .modal-backdrop.show .modal{transform:scale(1)}
+  .modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--brd);flex-shrink:0}
+  .modal-head h2{font-size:17px;font-weight:750;letter-spacing:-.3px;display:flex;align-items:center;gap:10px}
+  .modal-head h2 svg{color:var(--accent)}
+  .modal-body{flex:1;overflow-y:auto;padding:18px 22px}
+  .modal-body::-webkit-scrollbar{width:6px}
+  .modal-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:4px}
+  .modal-body::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+
+  .fs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+  .fs-card{background:rgba(255,255,255,.035);border:1px solid var(--brd);border-radius:13px;padding:13px 15px;transition:border-color .2s,transform .2s;cursor:pointer}
+  .fs-card:hover{border-color:rgba(0,130,200,.5);transform:translateY(-2px)}
+  .fs-card h5{font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--accent-2);margin-bottom:8px;display:flex;align-items:center;gap:7px}
+  .fs-card code{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--txt);display:block;line-height:1.7;white-space:pre-wrap;word-break:break-word}
+  .fs-card p{font-size:11.4px;color:var(--dim);line-height:1.5;margin-top:8px}
+
+  .help-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+  .help-item{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.035);border:1px solid var(--brd);border-radius:11px;padding:11px 13px}
+  .kbd{font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:600;background:rgba(0,130,200,.15);border:1px solid rgba(0,130,200,.35);color:var(--accent-2);padding:3px 8px;border-radius:6px;min-width:34px;text-align:center;flex-shrink:0}
+  .help-txt{font-size:12.3px;color:var(--dim);font-weight:550}
+
+  .modal-foot{padding:14px 22px;border-top:1px solid var(--brd);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-shrink:0}
+  .modal-foot .note{font-size:11.4px;color:var(--dim-2)}
+  .modal-btn{padding:9px 16px;border-radius:10px;border:1px solid var(--brd);background:rgba(255,255,255,.04);color:var(--txt);font-size:12.5px;font-weight:650;cursor:pointer;transition:all .2s;font-family:inherit}
+  .modal-btn:hover{background:var(--accent-dim);border-color:rgba(0,130,200,.5);color:#fff}
+  .modal-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+  .modal-btn.primary:hover{background:var(--accent-2)}
+
+  .toast{position:fixed;bottom:24px;left:50%;transform:translate(-50%,120%);background:rgba(9,15,21,.95);border:1px solid var(--brd);border-radius:12px;padding:11px 18px;font-size:12.5px;font-weight:600;color:var(--txt);z-index:60;box-shadow:0 12px 40px rgba(0,0,0,.5);transition:transform .35s cubic-bezier(.22,1,.36,1);display:flex;align-items:center;gap:9px;backdrop-filter:blur(14px)}
+  .toast.show{transform:translate(-50%,0)}
+  .toast svg{color:var(--accent-2);flex-shrink:0}
+
+  @media (max-width: 900px){
+    #app{grid-template-columns:1fr;grid-template-rows:auto 1fr}
+    .sidebar{flex-direction:row;align-items:center;overflow-x:auto;overflow-y:hidden;border-right:none;border-bottom:1px solid var(--brd);padding:0 8px;scrollbar-width:none}
+    .sidebar::-webkit-scrollbar{display:none}
+    .sidebar::after{display:none}
+    .brand{padding:10px 12px 10px 6px}
+    .brand-sub{display:none}
+    .search-wrap,.cat-chips,.nav-label{display:none}
+    .nav{flex-direction:row;padding:0;gap:4px;overflow:visible;flex:1}
+    .nav-item{padding:8px 12px;white-space:nowrap;flex-shrink:0;width:auto}
+    .nav-item.active::before{display:none}
+    .nav-name{font-size:12.5px;max-width:120px}
+    .sidebar-foot{flex-direction:row;border-top:none;padding:6px 8px;gap:6px}
+    .side-link span{display:none}
+    .side-link{padding:8px;width:auto}
+    .credit{display:none}
+    .info-panel{width:calc(100% - 24px);left:12px;bottom:12px;padding:12px;max-height:44%;overflow-y:auto}
+    .info-panel p{font-size:11.5px}
+    .controls-panel{right:12px;top:12px;width:220px;padding:12px;max-height:calc(100% - 100px)}
+    .hint{display:none}
+    h1{font-size:14px}
+    .tag{display:none}
+    .link-btn span{display:none}
+    .link-btn{padding:8px 10px}
+    .tb-right{gap:5px}
+    .icon-btn{width:32px;height:32px}
+    .modal{max-height:90vh}
+  }
+  @media (max-width: 560px){
+    .ro-grid{grid-template-columns:1fr 1fr}
+    .controls-panel{width:180px}
+    .fs-grid,.help-grid{grid-template-columns:1fr}
+    .modal-head h2{font-size:15px}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">⚛</div>
+      <div>
+        <div class="brand-name">PhysicsLab 3D</div>
+        <div class="brand-sub">Master Every Concept</div>
+      </div>
+    </div>
+
+    <div class="search-wrap">
+      <label class="search-box">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input type="text" id="search" placeholder="Search lessons…" autocomplete="off" spellcheck="false">
+      </label>
+    </div>
+
+    <div class="cat-chips" id="cats"></div>
+
+    <div class="nav-label">
+      <span>Lessons</span>
+      <span class="cnt" id="lesson-count">0/0</span>
+    </div>
+    <nav class="nav" id="nav"></nav>
+
+    <div class="sidebar-foot">
+      <button class="side-link" id="open-formula" type="button">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        <span>Formula Sheet</span>
+      </button>
+      <a class="side-link yt" href="https://youtube.com/@hawasoftware" target="_blank" rel="noopener noreferrer">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4L15.8 12l-6.2 3.6z"/></svg>
+        <span>YouTube</span>
+      </a>
+      <a class="side-link gh" href="https://github.com/hawasoftware" target="_blank" rel="noopener noreferrer">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 0-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.3.5-2.4 1.2-3.2 0-.4-.5-1.6.2-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.7 1.6.3 2.8.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .3z"/></svg>
+        <span>GitHub</span>
+      </a>
+      <div class="credit">by @hawasoftware</div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="tb-left">
+        <span class="tag" id="lesson-tag">Mechanics</span>
+        <h1 id="lesson-title">Projectile Motion</h1>
+      </div>
+      <div class="tb-right">
+        <button class="icon-btn" id="btn-pause" title="Play / Pause (Space)">⏸</button>
+        <button class="icon-btn" id="btn-reset" title="Reset (R)">⟲</button>
+        <button class="icon-btn" id="btn-settings" title="Settings">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+        <button class="icon-btn" id="btn-help" title="Help (?)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+        </button>
+        <button class="icon-btn" id="btn-fs" title="Fullscreen (F)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+        </button>
+        <a class="link-btn yt" href="https://youtube.com/@hawasoftware" target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4L15.8 12l-6.2 3.6z"/></svg>
+          <span>YouTube</span>
+        </a>
+        <a class="link-btn gh" href="https://github.com/hawasoftware" target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 0-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.3.5-2.4 1.2-3.2 0-.4-.5-1.6.2-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.7 1.6.3 2.8.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .3z"/></svg>
+          <span>GitHub</span>
+        </a>
+      </div>
+    </header>
+
+    <div class="stage" id="stage">
+      <canvas id="gl"></canvas>
+
+      <div class="panel controls-panel">
+        <div class="ctrl-title">Parameters</div>
+        <div id="controls"></div>
+      </div>
+
+      <div class="panel info-panel">
+        <p id="lesson-blurb"></p>
+        <div class="formula" id="lesson-formula"></div>
+        <div class="ro-grid" id="readout"></div>
+      </div>
+
+      <div class="hint">Drag orbit · Scroll zoom · Right-drag pan</div>
+    </div>
+  </main>
+</div>
+
+<div class="drawer-backdrop" id="drawer-backdrop"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-head">
+    <h3>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Settings
+    </h3>
+    <button class="icon-btn" id="drawer-close" title="Close">✕</button>
+  </div>
+  <div class="drawer-body">
+    <div class="setting-section">
+      <h4>Simulation Speed</h4>
+      <div class="speed-row" id="speed-row">
+        <button class="speed-btn" data-speed="0.25" type="button">0.25×</button>
+        <button class="speed-btn" data-speed="0.5" type="button">0.5×</button>
+        <button class="speed-btn on" data-speed="1" type="button">1×</button>
+        <button class="speed-btn" data-speed="1.5" type="button">1.5×</button>
+        <button class="speed-btn" data-speed="2" type="button">2×</button>
+      </div>
+    </div>
+
+    <div class="setting-section">
+      <h4>Display</h4>
+      <div class="toggle-row" data-set="grid">
+        <span class="toggle-label">Show grid</span>
+        <div class="toggle on" id="t-grid"></div>
+      </div>
+      <div class="toggle-row" data-set="trails">
+        <span class="toggle-label">Show trails</span>
+        <div class="toggle on" id="t-trails"></div>
+      </div>
+      <div class="toggle-row" data-set="vectors">
+        <span class="toggle-label">Show vectors</span>
+        <div class="toggle on" id="t-vectors"></div>
+      </div>
+      <div class="toggle-row" data-set="autospin">
+        <span class="toggle-label">Auto-rotate camera</span>
+        <div class="toggle" id="t-autospin"></div>
+      </div>
+    </div>
+
+    <div class="setting-section">
+      <h4>Progress & Data</h4>
+      <div class="toggle-row" data-set="hidecompleted">
+        <span class="toggle-label">Hide completed</span>
+        <div class="toggle" id="t-hidecompleted"></div>
+      </div>
+      <button class="danger-btn" id="btn-reset-progress" type="button">Reset all progress & favorites</button>
+    </div>
+  </div>
+</aside>
+
+<div class="modal-backdrop" id="modal-formula">
+  <div class="modal">
+    <div class="modal-head">
+      <h2>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        Formula Reference
+      </h2>
+      <button class="icon-btn" data-close="modal-formula" title="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="fs-grid" id="fs-grid"></div>
+    </div>
+    <div class="modal-foot">
+      <span class="note">Click any formula to jump to its lesson.</span>
+      <button class="modal-btn" data-close="modal-formula" type="button">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modal-help">
+  <div class="modal">
+    <div class="modal-head">
+      <h2>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+        Help & Shortcuts
+      </h2>
+      <button class="icon-btn" data-close="modal-help" title="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="help-grid">
+        <div class="help-item"><span class="kbd">Space</span><span class="help-txt">Play / Pause simulation</span></div>
+        <div class="help-item"><span class="kbd">R</span><span class="help-txt">Reset current lesson</span></div>
+        <div class="help-item"><span class="kbd">F</span><span class="help-txt">Toggle fullscreen</span></div>
+        <div class="help-item"><span class="kbd">?</span><span class="help-txt">Open this help</span></div>
+        <div class="help-item"><span class="kbd">1–9</span><span class="help-txt">Jump to lesson number</span></div>
+        <div class="help-item"><span class="kbd">← →</span><span class="help-txt">Previous / next lesson</span></div>
+        <div class="help-item"><span class="kbd">S</span><span class="help-txt">Toggle settings drawer</span></div>
+        <div class="help-item"><span class="kbd">/</span><span class="help-txt">Focus search</span></div>
+        <div class="help-item"><span class="kbd">Esc</span><span class="help-txt">Close drawers / modals</span></div>
+      </div>
+      <p style="font-size:12.4px;color:var(--dim);line-height:1.6;margin-top:18px">
+        <b style="color:var(--txt)">Mouse / Touch:</b> Drag to orbit the camera, scroll to zoom, right-drag to pan. Every slider updates its scene in real time.
+      </p>
+    </div>
+    <div class="modal-foot">
+      <span class="note">Built by <b style="color:var(--accent-2)">@hawasoftware</b></span>
+      <button class="modal-btn primary" data-close="modal-help" type="button">Got it</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>
+  <span id="toast-text">Done</span>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const ACCENT = 0x0082c8;
+const TWO_PI = Math.PI * 2;
+const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+const fmt = v => (Math.abs(v) >= 1000 ? v.toExponential(2) : Math.abs(v) >= 100 ? v.toFixed(0) : Math.abs(v) >= 10 ? v.toFixed(1) : v.toFixed(2));
+
+function fibSphere(n, radius) {
+  const pts = [];
+  const ga = Math.PI * (3 - Math.sqrt(5));
+  for (let i = 0; i < n; i++) {
+    const y = 1 - (i / Math.max(1, n - 1)) * 2;
+    const r = Math.sqrt(Math.max(0, 1 - y * y));
+    const th = ga * i;
+    pts.push(new THREE.Vector3(Math.cos(th) * r * radius, y * radius, Math.sin(th) * r * radius));
+  }
+  return pts;
+}
+
+const stageEl = document.getElementById('stage');
+const canvas = document.getElementById('gl');
+
+let renderer;
+try {
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance', stencil: false });
+} catch (e) {
+  stageEl.innerHTML = '<div style="color:#8ba4ba;display:grid;place-items:center;height:100%;font-family:Inter">WebGL is not available in this browser.</div>';
+  throw e;
+}
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.setClearAlpha(0);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 4000);
+camera.position.set(38, 26, 52);
+
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true;
+controls.dampingFactor = 0.075;
+controls.rotateSpeed = 0.85;
+controls.zoomSpeed = 0.9;
+controls.panSpeed = 0.8;
+controls.maxPolarAngle = Math.PI * 0.495;
+controls.target.set(20, 8, 0);
+controls.autoRotateSpeed = 1.2;
+
+scene.add(new THREE.HemisphereLight(0xa8d8ff, 0x0a1018, 1.15));
+const keyLight = new THREE.DirectionalLight(0xffffff, 2.0);
+keyLight.position.set(6, 12, 8);
+scene.add(keyLight);
+const rimLight = new THREE.DirectionalLight(0x0082c8, 1.9);
+rimLight.position.set(-8, 5, -9);
+scene.add(rimLight);
+const fillLight = new THREE.DirectionalLight(0x33a9e8, 0.7);
+fillLight.position.set(0, -6, 4);
+scene.add(fillLight);
+
+/* ============ GLOBAL SETTINGS ============ */
+const settings = {
+  timeScale: 1,
+  grid: true,
+  trails: true,
+  vectors: true,
+  autospin: false,
+  hidecompleted: false
+};
+
+/* ============ VISIBILITY TAGGING ============ */
+function tag(obj, type) {
+  obj.userData.type = type;
+  return obj;
+}
+function organizeVisibility(group) {
+  const gridG = new THREE.Group();
+  const trailG = new THREE.Group();
+  const vectorG = new THREE.Group();
+  gridG.visible = settings.grid;
+  trailG.visible = settings.trails;
+  vectorG.visible = settings.vectors;
+  const toMove = [];
+  group.traverse(o => {
+    if (o !== group && o.userData.type) toMove.push([o, o.userData.type]);
+  });
+  for (const [o, t] of toMove) {
+    if (t === 'grid') gridG.add(o);
+    else if (t === 'trail') trailG.add(o);
+    else if (t === 'vector') vectorG.add(o);
+  }
+  group.add(gridG, trailG, vectorG);
+  return { gridG, trailG, vectorG };
+}
+function applySettingsToScene() {
+  if (!current || !current.visGroups) return;
+  current.visGroups.gridG.visible = settings.grid;
+  current.visGroups.trailG.visible = settings.trails;
+  current.visGroups.vectorG.visible = settings.vectors;
+}
+
+function disposeGroup(group) {
+  scene.remove(group);
+  group.traverse(o => {
+    if (o.geometry) o.geometry.dispose();
+    const mats = Array.isArray(o.material) ? o.material : (o.material ? [o.material] : []);
+    for (const m of mats) {
+      for (const k in m) { const v = m[k]; if (v && v.isTexture) v.dispose(); }
+      m.dispose();
+    }
+  });
+}
+
+/* ============ LESSONS ============ */
+
+const L_PROJECTILE = {
+  id: 'projectile', name: 'Projectile Motion', icon: '🎯', tag: 'Mechanics',
+  blurb: 'Launch a body and watch gravity bend its path into a parabola. Horizontal velocity stays constant while vertical velocity changes uniformly — the two axes are completely independent.',
+  formula: 'x = v₀cosθ·t    y = v₀sinθ·t − ½gt²',
+  view: { pos: [40, 27, 54], target: [20, 8, 0], min: 8, max: 240 },
+  params: [
+    { key: 'v0', label: 'Launch speed', min: 5, max: 35, step: 0.5, value: 22, unit: 'm/s' },
+    { key: 'ang', label: 'Launch angle', min: 5, max: 85, step: 1, value: 45, unit: '°' },
+    { key: 'g', label: 'Gravity', min: 1.6, max: 20, step: 0.1, value: 9.81, unit: 'm/s²' }
+  ],
+  build(group, p) {
+    const ground = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), new THREE.MeshStandardMaterial({ color: 0x0b1620, roughness: 1, metalness: 0 }));
+    ground.rotation.x = -Math.PI / 2; ground.position.y = -0.02;
+    group.add(ground);
+
+    const grid = tag(new THREE.GridHelper(300, 60, ACCENT, 0x14324a), 'grid');
+    grid.material.transparent = true; grid.material.opacity = 0.3;
+    group.add(grid);
+
+    const barrelGeo = new THREE.CylinderGeometry(0.42, 0.58, 4, 18);
+    barrelGeo.translate(0, 2, 0);
+    const barrel = new THREE.Mesh(barrelGeo, new THREE.MeshStandardMaterial({ color: ACCENT, emissive: 0x00304d, roughness: 0.3, metalness: 0.85 }));
+    group.add(barrel);
+
+    const base = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.8, 0.5, 24), new THREE.MeshStandardMaterial({ color: 0x16252f, roughness: 0.7, metalness: 0.4 }));
+    base.position.y = 0.25; group.add(base);
+
+    const ball = new THREE.Mesh(new THREE.SphereGeometry(0.78, 24, 18), new THREE.MeshStandardMaterial({ color: 0xffd166, emissive: 0xa06400, emissiveIntensity: 0.55, roughness: 0.25, metalness: 0.5 }));
+    group.add(ball);
+
+    const arrow = tag(new THREE.ArrowHelper(new THREE.Vector3(1, 1, 0).normalize(), new THREE.Vector3(), 4, 0x00e0a0, 1.1, 0.6), 'vector');
+    group.add(arrow);
+
+    let tube = null, tf = 1, vx = 1, vy = 1;
+    function rebuild() {
+      const th = p.ang * Math.PI / 180;
+      vx = p.v0 * Math.cos(th); vy = p.v0 * Math.sin(th);
+      tf = Math.max(0.01, 2 * vy / p.g);
+      const N = 72, pts = [];
+      for (let i = 0; i <= N; i++) {
+        const t = tf * i / N;
+        pts.push(new THREE.Vector3(vx * t, vy * t - 0.5 * p.g * t * t, 0));
+      }
+      const curve = new THREE.CatmullRomCurve3(pts);
+      const geo = new THREE.TubeGeometry(curve, 110, 0.085, 7, false);
+      if (tube) { group.remove(tube); tube.geometry.dispose(); tube.material.dispose(); }
+      tube = tag(new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: ACCENT, emissive: 0x005b8c, emissiveIntensity: 0.9, roughness: 0.4, metalness: 0.3, transparent: true, opacity: 0.8 })), 'trail');
+      group.add(tube);
+      barrel.rotation.z = th - Math.PI / 2;
+    }
+    rebuild();
+
+    let t = 0; const pos = new THREE.Vector3();
+    return {
+      onChange: rebuild,
+      update(dt) {
+        t += dt; if (t > tf + 0.85) t = 0;
+        const tc = Math.min(t, tf);
+        pos.set(vx * tc, vy * tc - 0.5 * p.g * tc * tc, 0);
+        ball.position.copy(pos);
+        ball.visible = t <= tf;
+        arrow.position.copy(pos);
+        arrow.visible = ball.visible && tc > 0.05;
+        const vxv = vx, vyv = vy - p.g * tc;
+        const speed = Math.hypot(vxv, vyv);
+        if (speed > 0.05) {
+          arrow.setDirection(new THREE.Vector3(vxv / speed, vyv / speed, 0));
+          arrow.setLength(Math.max(1.2, speed * 0.28), Math.max(0.5, speed * 0.075), Math.max(0.3, speed * 0.045));
+        }
+      },
+      readout() {
+        const th = p.ang * Math.PI / 180;
+        const range = (p.v0 * p.v0 * Math.sin(2 * th)) / p.g;
+        const hmax = (p.v0 * Math.sin(th)) ** 2 / (2 * p.g);
+        return [['Flight time', tf.toFixed(2) + ' s'], ['Max height', hmax.toFixed(1) + ' m'], ['Range', range.toFixed(1) + ' m'], ['Apex time', (tf / 2).toFixed(2) + ' s']];
+      }
+    };
+  }
+};
+
+const L_PENDULUM = {
+  id: 'pendulum', name: 'Pendulum', icon: '⏱️', tag: 'Oscillations',
+  blurb: 'A mass on a string swings under gravity. For small angles the period depends only on the length and gravity — not on the mass or the amplitude. This is isochronism.',
+  formula: 'θ̈ = −(g/L)·sin θ        T ≈ 2π√(L/g)',
+  view: { pos: [0, 5.2, 14], target: [0, 4.6, 0], min: 3, max: 70 },
+  params: [
+    { key: 'L', label: 'Length', min: 1, max: 6, step: 0.1, value: 3.2, unit: 'm' },
+    { key: 'g', label: 'Gravity', min: 1.6, max: 20, step: 0.1, value: 9.81, unit: 'm/s²' },
+    { key: 'a0', label: 'Release angle', min: 5, max: 89, step: 1, value: 50, unit: '°' },
+    { key: 'c', label: 'Air damping', min: 0, max: 0.8, step: 0.01, value: 0.04, unit: '' }
+  ],
+  build(group, p) {
+    const PIV = new THREE.Vector3(0, 7, 0);
+    const bar = new THREE.Mesh(new THREE.BoxGeometry(6.5, 0.4, 1.3), new THREE.MeshStandardMaterial({ color: 0x1b2c3a, roughness: 0.8, metalness: 0.25 }));
+    bar.position.set(0, 7.35, 0); group.add(bar);
+
+    const pivot = new THREE.Mesh(new THREE.SphereGeometry(0.24, 18, 14), new THREE.MeshStandardMaterial({ color: 0x9fb6c8, metalness: 0.95, roughness: 0.2 }));
+    pivot.position.copy(PIV); group.add(pivot);
+
+    const rodGeo = new THREE.CylinderGeometry(0.05, 0.05, 1, 8);
+    rodGeo.translate(0, 0.5, 0);
+    const rod = new THREE.Mesh(rodGeo, new THREE.MeshStandardMaterial({ color: 0x93aabd, metalness: 0.7, roughness: 0.35 }));
+    group.add(rod);
+
+    const bob = new THREE.Mesh(new THREE.SphereGeometry(0.58, 26, 20), new THREE.MeshStandardMaterial({ color: ACCENT, emissive: 0x00456b, emissiveIntensity: 0.9, roughness: 0.22, metalness: 0.75 }));
+    group.add(bob);
+
+    const MAX = 240;
+    const trailPos = new Float32Array(MAX * 3);
+    const trailGeo = new THREE.BufferGeometry();
+    trailGeo.setAttribute('position', new THREE.BufferAttribute(trailPos, 3));
+    trailGeo.setDrawRange(0, 0);
+    const trail = tag(new THREE.Line(trailGeo, new THREE.LineBasicMaterial({ color: ACCENT, transparent: true, opacity: 0.6 })), 'trail');
+    trail.frustumCulled = false; group.add(trail);
+    let count = 0;
+
+    let theta = p.a0 * Math.PI / 180, omega = 0;
+    const UP = new THREE.Vector3(0, 1, 0), dir = new THREE.Vector3(), pos = new THREE.Vector3();
+
+    return {
+      onChange() { theta = p.a0 * Math.PI / 180; omega = 0; count = 0; trailGeo.setDrawRange(0, 0); },
+      update(dt) {
+        const steps = 4, h = Math.min(dt, 0.04) / steps;
+        for (let i = 0; i < steps; i++) {
+          const alpha = -(p.g / p.L) * Math.sin(theta) - p.c * omega;
+          omega += alpha * h; theta += omega * h;
+        }
+        pos.set(PIV.x + p.L * Math.sin(theta), PIV.y - p.L * Math.cos(theta), 0);
+        bob.position.copy(pos);
+        dir.copy(PIV).sub(pos).normalize();
+        rod.quaternion.setFromUnitVectors(UP, dir);
+        rod.position.copy(pos);
+        rod.scale.set(1, p.L, 1);
+
+        if (count < MAX) {
+          trailPos[count * 3] = pos.x; trailPos[count * 3 + 1] = pos.y; trailPos[count * 3 + 2] = pos.z; count++;
+        } else {
+          trailPos.copyWithin(0, 3);
+          const o = (MAX - 1) * 3;
+          trailPos[o] = pos.x; trailPos[o + 1] = pos.y; trailPos[o + 2] = pos.z;
+        }
+        trailGeo.setDrawRange(0, count);
+        trailGeo.attributes.position.needsUpdate = true;
+      },
+      readout() {
+        const T = 2 * Math.PI * Math.sqrt(p.L / p.g);
+        return [['Angle', (theta * 180 / Math.PI).toFixed(1) + '°'], ['Angular vel.', omega.toFixed(2) + ' rad/s'], ['Period', T.toFixed(2) + ' s'], ['Frequency', (1 / T).toFixed(2) + ' Hz']];
+      }
+    };
+  }
+};
+
+const L_WAVES = {
+  id: 'waves', name: 'Wave Motion', icon: '🌊', tag: 'Waves',
+  blurb: 'A travelling wave transports energy without transporting matter. Amplitude sets the height, frequency sets how often it oscillates, wavelength sets the spatial repeat distance.',
+  formula: 'y(x,t) = A·sin(kr − ωt)    k = 2π/λ    ω = 2πf    v = fλ',
+  view: { pos: [0, 21, 30], target: [0, 0, 0], min: 8, max: 130 },
+  params: [
+    { key: 'amp', label: 'Amplitude', min: 0, max: 4, step: 0.1, value: 1.5, unit: 'm' },
+    { key: 'freq', label: 'Frequency', min: 0.05, max: 1.5, step: 0.05, value: 0.5, unit: 'Hz' },
+    { key: 'lam', label: 'Wavelength', min: 2, max: 20, step: 0.5, value: 9, unit: 'm' }
+  ],
+  build(group, p) {
+    const SEG = 56, SIZE = 46;
+    const geo = new THREE.PlaneGeometry(SIZE, SIZE, SEG, SEG);
+    geo.rotateX(-Math.PI / 2);
+    const mat = new THREE.MeshStandardMaterial({ color: ACCENT, roughness: 0.3, metalness: 0.6, side: THREE.DoubleSide, emissive: 0x002a44, emissiveIntensity: 0.8 });
+    const mesh = new THREE.Mesh(geo, mat);
+    group.add(mesh);
+
+    const posAttr = geo.attributes.position, arr = posAttr.array, n = posAttr.count;
+    const baseX = new Float32Array(n), baseZ = new Float32Array(n);
+    for (let i = 0; i < n; i++) { baseX[i] = arr[i * 3]; baseZ[i] = arr[i * 3 + 2]; }
+
+    const ringPts = [];
+    for (let i = 0; i <= 100; i++) { const a = i / 100 * TWO_PI; ringPts.push(new THREE.Vector3(Math.cos(a) * SIZE / 2, 0, Math.sin(a) * SIZE / 2)); }
+    const ring = tag(new THREE.Line(new THREE.BufferGeometry().setFromPoints(ringPts), new THREE.LineBasicMaterial({ color: ACCENT, transparent: true, opacity: 0.35 })), 'grid');
+    group.add(ring);
+
+    let t = 0;
+    return {
+      update(dt) {
+        t += dt;
+        const k = TWO_PI / p.lam, w = TWO_PI * p.freq, amp = p.amp;
+        for (let i = 0; i < n; i++) {
+          const x = baseX[i], z = baseZ[i];
+          const r = Math.sqrt(x * x + z * z);
+          arr[i * 3 + 1] = amp * Math.sin(k * r - w * t) * Math.exp(-r * 0.028);
+        }
+        posAttr.needsUpdate = true;
+        geo.computeVertexNormals();
+      },
+      readout() {
+        return [['Wave speed', (p.freq * p.lam).toFixed(2) + ' m/s'], ['Period', (1 / p.freq).toFixed(2) + ' s'], ['Wave number k', (TWO_PI / p.lam).toFixed(3) + ' rad/m'], ['ω', (TWO_PI * p.freq).toFixed(2) + ' rad/s']];
+      }
+    };
+  }
+};
+
+const L_ORBITS = {
+  id: 'orbits', name: 'Orbital Motion', icon: '🪐', tag: 'Gravitation',
+  blurb: 'Gravity supplies the centripetal force that keeps a satellite in orbit. Launch too slowly and it spirals in; at exactly the circular speed it holds a perfect circle; too fast and it escapes.',
+  formula: 'F = GMm/r²        v_circ = √(GM/r)',
+  view: { pos: [0, 26, 44], target: [0, 0, 0], min: 8, max: 220 },
+  params: [
+    { key: 'vm', label: 'Launch speed', min: 0.3, max: 2.0, step: 0.02, value: 1, unit: '× v_c' },
+    { key: 'r0', label: 'Start distance', min: 6, max: 22, step: 0.5, value: 13, unit: 'm' },
+    { key: 'gm', label: 'Gravitational GM', min: 50, max: 600, step: 10, value: 260, unit: 'm³/s²' }
+  ],
+  build(group, p) {
+    const sun = new THREE.Mesh(new THREE.SphereGeometry(2.2, 32, 24), new THREE.MeshStandardMaterial({ color: 0xffcc55, emissive: 0xff9500, emissiveIntensity: 1.8, roughness: 0.45 }));
+    group.add(sun);
+    const glow = new THREE.Mesh(new THREE.SphereGeometry(3.4, 24, 18), new THREE.MeshBasicMaterial({ color: 0xffaa33, transparent: true, opacity: 0.11, depthWrite: false }));
+    group.add(glow);
+    const sunLight = new THREE.PointLight(0xffbb55, 2.2, 120, 1.6);
+    group.add(sunLight);
+
+    const sat = new THREE.Mesh(new THREE.SphereGeometry(0.72, 22, 16), new THREE.MeshStandardMaterial({ color: ACCENT, emissive: 0x005f8f, emissiveIntensity: 1.1, roughness: 0.28, metalness: 0.65 }));
+    group.add(sat);
+
+    const ringPts = [];
+    for (let i = 0; i <= 140; i++) { const a = i / 140 * TWO_PI; ringPts.push(new THREE.Vector3(Math.cos(a), 0, Math.sin(a))); }
+    const ring = tag(new THREE.Line(new THREE.BufferGeometry().setFromPoints(ringPts), new THREE.LineDashedMaterial({ color: ACCENT, transparent: true, opacity: 0.4, dashSize: 0.9, gapSize: 0.7 })), 'grid');
+    ring.computeLineDistances();
+    group.add(ring);
+
+    const MAX = 900;
+    const trailPos = new Float32Array(MAX * 3);
+    const trailGeo = new THREE.BufferGeometry();
+    trailGeo.setAttribute('position', new THREE.BufferAttribute(trailPos, 3));
+    trailGeo.setDrawRange(0, 0);
+    const trail = tag(new THREE.Line(trailGeo, new THREE.LineBasicMaterial({ color: 0x33a9e8, transparent: true, opacity: 0.65 })), 'trail');
+    trail.frustumCulled = false; group.add(trail);
+
+    let pos = new THREE.Vector3(), vel = new THREE.Vector3();
+    let count = 0, lastTrail = new THREE.Vector3();
+
+    function reset() {
+      ring.scale.setScalar(p.r0);
+      const vc = Math.sqrt(p.gm / p.r0);
+      pos.set(p.r0, 0, 0); vel.set(0, 0, -vc * p.vm);
+      count = 0; trailGeo.setDrawRange(0, 0); lastTrail.copy(pos);
+    }
+    reset();
+
+    const acc = new THREE.Vector3();
+    function accel(v) {
+      const r2 = v.lengthSq(), r = Math.sqrt(r2);
+      acc.copy(v).multiplyScalar(-p.gm / (r2 * r));
+    }
+
+    return {
+      onChange: reset,
+      update(dt) {
+        const SCALE = 2.0, SUB = 8;
+        const h = Math.min(dt, 0.05) * SCALE / SUB;
+        for (let i = 0; i < SUB; i++) {
+          accel(pos); vel.addScaledVector(acc, h * 0.5);
+          pos.addScaledVector(vel, h);
+          accel(pos); vel.addScaledVector(acc, h * 0.5);
+        }
+        const r = pos.length();
+        if (r < 2.6 || r > 160 || !isFinite(r)) { reset(); return; }
+        sat.position.copy(pos);
+        if (pos.distanceTo(lastTrail) > 0.12) {
+          if (count < MAX) {
+            trailPos[count * 3] = pos.x; trailPos[count * 3 + 1] = pos.y; trailPos[count * 3 + 2] = pos.z; count++;
+          } else {
+            trailPos.copyWithin(0, 3);
+            const o = (MAX - 1) * 3;
+            trailPos[o] = pos.x; trailPos[o + 1] = pos.y; trailPos[o + 2] = pos.z;
+          }
+          lastTrail.copy(pos);
+          trailGeo.setDrawRange(0, count);
+          trailGeo.attributes.position.needsUpdate = true;
+        }
+      },
+      readout() {
+        const r = pos.length(), speed = vel.length();
+        const vc = Math.sqrt(p.gm / r), ratio = speed / vc;
+        let type = 'Elliptical';
+        if (Math.abs(ratio - 1) < 0.03) type = 'Circular';
+        else if (ratio >= Math.SQRT2 - 0.02) type = 'Escape';
+        else if (ratio < 1) type = 'Elliptical / falling';
+        return [['Distance r', r.toFixed(2) + ' m'], ['Speed', speed.toFixed(2) + ' m/s'], ['v / v_circ', ratio.toFixed(3)], ['Orbit type', type]];
+      }
+    };
+  }
+};
+
+const L_SPRING = {
+  id: 'spring', name: "Spring & Hooke's Law", icon: '🌀', tag: 'Oscillations',
+  blurb: 'The restoring force of an ideal spring is proportional to its extension. A stiffer spring and a lighter mass oscillate faster; damping drains the energy away.',
+  formula: 'F = −k·x      ω = √(k/m)      T = 2π√(m/k)',
+  view: { pos: [7.5, 6.5, 15], target: [0, 4.6, 0], min: 4, max: 70 },
+  params: [
+    { key: 'k', label: 'Spring constant k', min: 5, max: 150, step: 1, value: 45, unit: 'N/m' },
+    { key: 'm', label: 'Mass', min: 0.5, max: 8, step: 0.1, value: 2, unit: 'kg' },
+    { key: 'A', label: 'Amplitude', min: 0, max: 2.4, step: 0.05, value: 1.2, unit: 'm' },
+    { key: 'c', label: 'Damping', min: 0, max: 3, step: 0.05, value: 0.35, unit: 'N·s/m' }
+  ],
+  build(group, p) {
+    const CEIL = 9.2, L0 = 2.5, G = 9.81;
+    const ceil = new THREE.Mesh(new THREE.BoxGeometry(6, 0.45, 3), new THREE.MeshStandardMaterial({ color: 0x1b2c3a, roughness: 0.8, metalness: 0.25 }));
+    ceil.position.set(0, CEIL + 0.22, 0); group.add(ceil);
+
+    const TURNS = 82, COILS = 9, RAD = 0.44;
+    const springPos = new Float32Array((TURNS + 1) * 3);
+    const springGeo = new THREE.BufferGeometry();
+    springGeo.setAttribute('position', new THREE.BufferAttribute(springPos, 3));
+    const spring = new THREE.Line(springGeo, new THREE.LineBasicMaterial({ color: 0x7fd4ff }));
+    spring.frustumCulled = false; group.add(spring);
+
+    const massMesh = new THREE.Mesh(new THREE.BoxGeometry(1.9, 1.15, 1.9), new THREE.MeshStandardMaterial({ color: ACCENT, emissive: 0x003a5e, emissiveIntensity: 0.85, roughness: 0.3, metalness: 0.7 }));
+    group.add(massMesh);
+
+    const eqPts = [];
+    for (let i = -30; i <= 30; i++) eqPts.push(new THREE.Vector3(i * 0.25, 0, 0));
+    const eqLine = tag(new THREE.Line(new THREE.BufferGeometry().setFromPoints(eqPts), new THREE.LineDashedMaterial({ color: 0x33a9e8, transparent: true, opacity: 0.4, dashSize: 0.5, gapSize: 0.4 })), 'grid');
+    eqLine.computeLineDistances(); group.add(eqLine);
+
+    let x = p.A, v = 0;
+    return {
+      onChange() { x = p.A; v = 0; },
+      update(dt) {
+        const steps = 4, h = Math.min(dt, 0.04) / steps;
+        for (let i = 0; i < steps; i++) {
+          const a = -(p.k / p.m) * x - (p.c / p.m) * v;
+          v += a * h; x += v * h;
+        }
+        x = clamp(x, -3.2, 3.2);
+        const ext = p.m * G / p.k, Leq = L0 + ext;
+        const yMass = CEIL - Leq - x, halfH = 0.575;
+        const springTop = CEIL, springBottom = yMass + halfH;
+        const len = Math.max(0.35, springTop - springBottom);
+        for (let i = 0; i <= TURNS; i++) {
+          const u = i / TURNS, ang = u * COILS * TWO_PI;
+          springPos[i * 3] = Math.cos(ang) * RAD;
+          springPos[i * 3 + 1] = springTop - u * len;
+          springPos[i * 3 + 2] = Math.sin(ang) * RAD;
+        }
+        springGeo.attributes.position.needsUpdate = true;
+        massMesh.position.y = yMass;
+        eqLine.position.y = CEIL - Leq;
+      },
+      readout() {
+        const T = TWO_PI * Math.sqrt(p.m / p.k);
+        return [['Period T', T.toFixed(3) + ' s'], ['Frequency', (1 / T).toFixed(3) + ' Hz'], ['Displacement', x.toFixed(3) + ' m'], ['Velocity', v.toFixed(2) + ' m/s']];
+      }
+    };
+  }
+};
+
+const L_COLLISION = {
+  id: 'collision', name: 'Momentum & Collisions', icon: '💥', tag: 'Dynamics',
+  blurb: 'In any collision total momentum is always conserved. Kinetic energy is conserved only when the collision is perfectly elastic (restitution = 1). The walls behave as ideal reflectors.',
+  formula: 'm₁v₁ + m₂v₂ = m₁v₁′ + m₂v₂′      e = −(v₂′−v₁′)/(v₂−v₁)',
+  view: { pos: [0, 15, 40], target: [0, 2, 0], min: 10, max: 150 },
+  params: [
+    { key: 'm1', label: 'Mass A', min: 0.5, max: 12, step: 0.1, value: 3, unit: 'kg' },
+    { key: 'm2', label: 'Mass B', min: 0.5, max: 12, step: 0.1, value: 6, unit: 'kg' },
+    { key: 'v1', label: 'Velocity A', min: -14, max: 14, step: 0.5, value: 9, unit: 'm/s' },
+    { key: 'v2', label: 'Velocity B', min: -14, max: 14, step: 0.5, value: -4, unit: 'm/s' },
+    { key: 'e', label: 'Restitution', min: 0, max: 1, step: 0.05, value: 1, unit: '' }
+  ],
+  build(group, p) {
+    const HALF = 20, START = 12;
+    const track = new THREE.Mesh(new THREE.BoxGeometry(HALF * 2 + 5, 0.6, 7), new THREE.MeshStandardMaterial({ color: 0x12202c, roughness: 0.92, metalness: 0.1 }));
+    track.position.y = -0.3; group.add(track);
+    for (const z of [-3.5, 3.5]) {
+      const rail = tag(new THREE.Mesh(new THREE.BoxGeometry(HALF * 2 + 5, 0.28, 0.24), new THREE.MeshStandardMaterial({ color: ACCENT, emissive: 0x004a72, roughness: 0.4, metalness: 0.6 })), 'grid');
+      rail.position.set(0, 0.06, z); group.add(rail);
+    }
+    for (const sx of [-1, 1]) {
+      const post = new THREE.Mesh(new THREE.BoxGeometry(0.5, 2.6, 7.4), new THREE.MeshStandardMaterial({ color: 0x1c3040, roughness: 0.7, metalness: 0.3 }));
+      post.position.set(sx * (HALF + 2.5), 1.3, 0); group.add(post);
+    }
+
+    const matA = new THREE.MeshStandardMaterial({ color: ACCENT, emissive: 0x00456b, emissiveIntensity: 0.9, roughness: 0.25, metalness: 0.7 });
+    const matB = new THREE.MeshStandardMaterial({ color: 0xff8a3d, emissive: 0x7a3300, emissiveIntensity: 0.9, roughness: 0.25, metalness: 0.7 });
+    const ballA = new THREE.Mesh(new THREE.SphereGeometry(1, 28, 20), matA);
+    const ballB = new THREE.Mesh(new THREE.SphereGeometry(1, 28, 20), matB);
+    group.add(ballA, ballB);
+
+    const arrowA = tag(new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), new THREE.Vector3(), 4, 0x33a9e8, 1, 0.6), 'vector');
+    const arrowB = tag(new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), new THREE.Vector3(), 4, 0xff8a3d, 1, 0.6), 'vector');
+    group.add(arrowA, arrowB);
+
+    let x1 = -START, x2 = START, v1 = p.v1, v2 = p.v2, r1 = 0.7, r2 = 0.7;
+    function refresh() {
+      r1 = 0.62 * Math.cbrt(p.m1) + 0.22;
+      r2 = 0.62 * Math.cbrt(p.m2) + 0.22;
+      ballA.scale.setScalar(r1); ballB.scale.setScalar(r2);
+    }
+    function reset() { x1 = -START; x2 = START; v1 = p.v1; v2 = p.v2; refresh(); }
+    reset();
+
+    return {
+      onChange() { reset(); },
+      update(dt) {
+        const h = Math.min(dt, 0.033);
+        x1 += v1 * h; x2 += v2 * h;
+        const gap = x2 - x1, minGap = r1 + r2;
+        if (gap < minGap && (v1 - v2) > 0) {
+          const u1 = v1, u2 = v2, m1 = p.m1, m2 = p.m2, e = p.e;
+          v1 = ((m1 - e * m2) * u1 + (1 + e) * m2 * u2) / (m1 + m2);
+          v2 = ((m2 - e * m1) * u2 + (1 + e) * m1 * u1) / (m1 + m2);
+          const overlap = minGap - gap;
+          x1 -= overlap * 0.5; x2 += overlap * 0.5;
+        }
+        if (x1 - r1 < -HALF) { x1 = -HALF + r1; v1 = Math.abs(v1); }
+        if (x1 + r1 > HALF) { x1 = HALF - r1; v1 = -Math.abs(v1); }
+        if (x2 - r2 < -HALF) { x2 = -HALF + r2; v2 = Math.abs(v2); }
+        if (x2 + r2 > HALF) { x2 = HALF - r2; v2 = -Math.abs(v2); }
+
+        ballA.position.set(x1, r1, 0); ballB.position.set(x2, r2, 0);
+        const ay = Math.max(r1, r2) + 2.4;
+        arrowA.position.set(x1, ay, 0); arrowB.position.set(x2, ay, 0);
+        const sa = Math.abs(v1); arrowA.visible = sa > 0.15;
+        if (sa > 0.15) {
+          arrowA.setDirection(new THREE.Vector3(Math.sign(v1), 0, 0));
+          arrowA.setLength(Math.max(1.2, sa * 0.34), Math.max(0.5, sa * 0.09), Math.max(0.3, sa * 0.055));
+        }
+        const sb = Math.abs(v2); arrowB.visible = sb > 0.15;
+        if (sb > 0.15) {
+          arrowB.setDirection(new THREE.Vector3(Math.sign(v2), 0, 0));
+          arrowB.setLength(Math.max(1.2, sb * 0.34), Math.max(0.5, sb * 0.09), Math.max(0.3, sb * 0.055));
+        }
+      },
+      readout() {
+        const mom = p.m1 * v1 + p.m2 * v2;
+        const ke = 0.5 * p.m1 * v1 * v1 + 0.5 * p.m2 * v2 * v2;
+        const type = p.e >= 0.99 ? 'Elastic' : p.e <= 0.01 ? 'Perfectly inelastic' : 'Partially elastic';
+        return [['Total momentum', mom.toFixed(2) + ' kg·m/s'], ['Kinetic energy', ke.toFixed(2) + ' J'], ['v_A', v1.toFixed(2) + ' m/s'], ['v_B', v2.toFixed(2) + ' m/s'], ['Collision type', type], ['Restitution e', p.e.toFixed(2)]];
+      }
+    };
+  }
+};
+
+const L_ELECTRIC = {
+  id: 'electric', name: 'Electric Fields', icon: '⚡', tag: 'Electromagnetism',
+  blurb: 'Like charges repel, opposite charges attract. Field lines flow out of positive charges and into negative ones, and their density tells you the field strength.',
+  formula: 'E = k·q/r²        F = k·q₁q₂/r²',
+  view: { pos: [0, 17, 32], target: [0, 0, 0], min: 8, max: 130 },
+  params: [
+    { key: 'q1', label: 'Charge A', min: -5, max: 5, step: 0.25, value: 3, unit: 'nC' },
+    { key: 'q2', label: 'Charge B', min: -5, max: 5, step: 0.25, value: -3, unit: 'nC' },
+    { key: 'sep', label: 'Separation', min: 5, max: 20, step: 0.5, value: 11, unit: 'm' }
+  ],
+  build(group, p) {
+    const linesGroup = new THREE.Group(); group.add(linesGroup);
+    const matA = new THREE.MeshStandardMaterial({ color: 0xff6b4a, emissive: 0x7a2408, emissiveIntensity: 1.2, roughness: 0.3, metalness: 0.4 });
+    const matB = new THREE.MeshStandardMaterial({ color: 0x2fa8e8, emissive: 0x003a5e, emissiveIntensity: 1.2, roughness: 0.3, metalness: 0.4 });
+    const sphA = new THREE.Mesh(new THREE.SphereGeometry(1.15, 26, 20), matA);
+    const sphB = new THREE.Mesh(new THREE.SphereGeometry(1.15, 26, 20), matB);
+    group.add(sphA, sphB);
+
+    const grid = tag(new THREE.GridHelper(70, 35, ACCENT, 0x122a3c), 'grid');
+    grid.material.transparent = true; grid.material.opacity = 0.18; grid.position.y = -8;
+    group.add(grid);
+
+    const charges = [{ q: p.q1, p: new THREE.Vector3() }, { q: p.q2, p: new THREE.Vector3() }];
+    const STEP = 0.55, MAX_STEPS = 260, tmpE = new THREE.Vector3();
+
+    function fieldAt(pt, out) {
+      out.set(0, 0, 0);
+      for (const c of charges) {
+        const dx = pt.x - c.p.x, dy = pt.y - c.p.y, dz = pt.z - c.p.z;
+        const r2 = dx * dx + dy * dy + dz * dz;
+        if (r2 < 0.02) continue;
+        const inv = c.q / (r2 * Math.sqrt(r2));
+        out.x += dx * inv; out.y += dy * inv; out.z += dz * inv;
+      }
+      return out;
+    }
+    function trace(start, dirSign) {
+      const pts = [start.clone()], pt = start.clone();
+      for (let i = 0; i < MAX_STEPS; i++) {
+        fieldAt(pt, tmpE);
+        const len = tmpE.length();
+        if (len < 1e-7) break;
+        pt.addScaledVector(tmpE, (dirSign / len) * STEP);
+        if (pt.lengthSq() > 3600) { pts.push(pt.clone()); break; }
+        let hit = false;
+        for (const c of charges) { if (pt.distanceTo(c.p) < 1.25) { hit = true; break; } }
+        pts.push(pt.clone());
+        if (hit) break;
+      }
+      return pts;
+    }
+    function rebuild() {
+      while (linesGroup.children.length) { const o = linesGroup.children.pop(); o.geometry.dispose(); o.material.dispose(); }
+      charges[0].q = p.q1; charges[1].q = p.q2;
+      charges[0].p.set(-p.sep / 2, 0, 0); charges[1].p.set(p.sep / 2, 0, 0);
+      sphA.position.copy(charges[0].p); sphB.position.copy(charges[1].p);
+      matA.color.setHex(p.q1 >= 0 ? 0xff6b4a : 0x2fa8e8); matA.emissive.setHex(p.q1 >= 0 ? 0x7a2408 : 0x003a5e);
+      matB.color.setHex(p.q2 >= 0 ? 0xff6b4a : 0x2fa8e8); matB.emissive.setHex(p.q2 >= 0 ? 0x7a2408 : 0x003a5e);
+      sphA.scale.setScalar(0.65 + Math.abs(p.q1) * 0.11);
+      sphB.scale.setScalar(0.65 + Math.abs(p.q2) * 0.11);
+      for (const c of charges) {
+        const mag = Math.abs(c.q);
+        if (mag < 0.3) continue;
+        const n = Math.round(clamp(mag * 4 + 4, 5, 22));
+        const seeds = fibSphere(n, 1.5 + Math.abs(c.q) * 0.1);
+        const col = c.q > 0 ? 0xff7a5c : 0x33a9e8;
+        const mat = new THREE.LineBasicMaterial({ color: col, transparent: true, opacity: 0.55 });
+        for (const s of seeds) {
+          const start = s.clone().add(c.p);
+          const pts = trace(start, c.q > 0 ? 1 : -1);
+          if (pts.length < 4) continue;
+          const geo = new THREE.BufferGeometry().setFromPoints(pts);
+          linesGroup.add(new THREE.Line(geo, mat));
+        }
+      }
+    }
+    rebuild();
+    return {
+      onChange: rebuild,
+      update() {},
+      readout() {
+        const k = 8.99e9;
+        const q1 = p.q1 * 1e-9, q2 = p.q2 * 1e-9, r = p.sep;
+        const F = Math.abs(k * q1 * q2 / (r * r));
+        const attr = (p.q1 * p.q2) > 0 ? 'Repulsive' : (p.q1 * p.q2) < 0 ? 'Attractive' : 'No force';
+        const Emid = Math.abs(k * q1 / ((r / 2) ** 2)) + Math.abs(k * q2 / ((r / 2) ** 2));
+        return [['Interaction', attr], ['Force F', F.toExponential(2) + ' N'], ['Field at mid', Emid.toFixed(2) + ' N/C'], ['Separation', r.toFixed(1) + ' m']];
+      }
+    };
+  }
+};
+
+const L_BUOYANCY = {
+  id: 'buoyancy', name: 'Buoyancy & Fluids', icon: '🛟', tag: 'Fluids',
+  blurb: 'A fluid pushes upward on any submerged object with a force equal to the weight of the fluid it displaces. Whether it floats or sinks depends on its density relative to the fluid.',
+  formula: 'F_b = ρ_fluid · V_displaced · g',
+  view: { pos: [13, 9.5, 21], target: [0, 5.2, 0], min: 6, max: 90 },
+  params: [
+    { key: 'rho', label: 'Block density', min: 0.1, max: 1.8, step: 0.02, value: 0.55, unit: 'g/cm³' },
+    { key: 'h', label: 'Drop height', min: 0, max: 10, step: 0.5, value: 7, unit: 'm' },
+    { key: 'c', label: 'Water drag', min: 0.2, max: 4, step: 0.1, value: 1.2, unit: '' }
+  ],
+  build(group, p) {
+    const SURF = 8, FLOOR = 0, BW = 2.4, BH = 2.4, TANK = 16, RHO_W = 1000, G = 9.81, A = BW * BW, V = A * BH;
+    const tank = new THREE.Mesh(new THREE.BoxGeometry(TANK, SURF, TANK), new THREE.MeshStandardMaterial({ color: 0x0d2438, roughness: 0.85, metalness: 0.1, transparent: true, opacity: 0.9 }));
+    tank.position.y = SURF / 2; group.add(tank);
+
+    const water = new THREE.Mesh(new THREE.BoxGeometry(TANK - 0.3, SURF - 0.1, TANK - 0.3), new THREE.MeshStandardMaterial({ color: ACCENT, transparent: true, opacity: 0.22, roughness: 0.15, metalness: 0.4, side: THREE.DoubleSide, depthWrite: false }));
+    water.position.y = (SURF - 0.1) / 2; group.add(water);
+
+    const surf = new THREE.Mesh(new THREE.PlaneGeometry(TANK - 0.3, TANK - 0.3), new THREE.MeshStandardMaterial({ color: 0x33a9e8, transparent: true, opacity: 0.35, roughness: 0.05, metalness: 0.9, side: THREE.DoubleSide, depthWrite: false }));
+    surf.rotation.x = -Math.PI / 2; surf.position.y = SURF; group.add(surf);
+
+    const floor = new THREE.Mesh(new THREE.BoxGeometry(TANK + 0.6, 0.5, TANK + 0.6), new THREE.MeshStandardMaterial({ color: 0x16252f, roughness: 0.9, metalness: 0.2 }));
+    floor.position.y = -0.25; group.add(floor);
+
+    const grid = tag(new THREE.GridHelper(TANK, 16, ACCENT, 0x123244), 'grid');
+    grid.material.transparent = true; grid.material.opacity = 0.25; grid.position.y = 0.01; group.add(grid);
+
+    const block = new THREE.Mesh(new THREE.BoxGeometry(BW, BH, BW), new THREE.MeshStandardMaterial({ color: 0xffb347, emissive: 0x6b3d00, emissiveIntensity: 0.6, roughness: 0.35, metalness: 0.5 }));
+    group.add(block);
+
+    let y = 0, vy = 0;
+    function reset() { y = SURF + BH / 2 + 0.5 + p.h; vy = 0; }
+    reset();
+
+    return {
+      onChange() { reset(); },
+      update(dt) {
+        const steps = 4, h = Math.min(dt, 0.04) / steps;
+        for (let i = 0; i < steps; i++) {
+          const mass = p.rho * RHO_W * V, weight = mass * G;
+          const sub = clamp(SURF - (y - BH / 2), 0, BH);
+          const buoy = RHO_W * G * A * sub;
+          const net = buoy - weight;
+          const a = net / mass - p.c * vy * (sub > 0.01 ? 1 : 0.06);
+          vy += a * h; y += vy * h;
+          if (y - BH / 2 < FLOOR) { y = FLOOR + BH / 2; vy = Math.abs(vy) * 0.25; }
+        }
+        block.position.y = y;
+        block.rotation.x += Math.abs(vy) * dt * 0.25;
+        block.rotation.z += Math.abs(vy) * dt * 0.18;
+      },
+      readout() {
+        const mass = p.rho * RHO_W * V;
+        const sub = clamp(SURF - (y - BH / 2), 0, BH);
+        const frac = sub / BH;
+        const state = p.rho < 1 ? 'Floats' : p.rho > 1 ? 'Sinks' : 'Neutral';
+        return [['Block mass', mass.toFixed(0) + ' kg'], ['Submerged', (frac * 100).toFixed(0) + ' %'], ['Buoyant force', (RHO_W * G * A * sub).toFixed(0) + ' N'], ['Prediction', state]];
+      }
+    };
+  }
+};
+
+/* FIX: Complete rewrite of Inclined Plane — the previous version had wrong signs
+   for the block position and inverted arrows. Block now sits properly on the ramp. */
+const L_INCLINE = {
+  id: 'incline', name: 'Inclined Plane', icon: '⛰️', tag: 'Mechanics',
+  blurb: 'On a slope, gravity splits into a component along the plane (accelerating the block) and one perpendicular (pressed into the surface). Friction opposes motion and depends on the normal force.',
+  formula: 'a = g(sinθ − μ·cosθ)    f = μ·N',
+  view: { pos: [16, 12, 22], target: [2, 2, 0], min: 6, max: 90 },
+  params: [
+    { key: 'ang', label: 'Incline angle', min: 0, max: 60, step: 1, value: 30, unit: '°' },
+    { key: 'mu', label: 'Friction μ', min: 0, max: 1, step: 0.02, value: 0.2, unit: '' },
+    { key: 'm', label: 'Mass', min: 0.5, max: 10, step: 0.1, value: 3, unit: 'kg' }
+  ],
+  build(group, p) {
+    const G = 9.81, LEN = 14, WIDTH = 5, THICK = 0.5, BW = 1.8;
+
+    const ramp = new THREE.Mesh(
+      new THREE.BoxGeometry(LEN, THICK, WIDTH),
+      new THREE.MeshStandardMaterial({ color: 0x1b2c3a, roughness: 0.8, metalness: 0.3 })
+    );
+    group.add(ramp);
+
+    const grid = tag(new THREE.GridHelper(60, 30, ACCENT, 0x123044), 'grid');
+    grid.position.y = -5; grid.material.transparent = true; grid.material.opacity = 0.22;
+    group.add(grid);
+
+    const block = new THREE.Mesh(
+      new THREE.BoxGeometry(BW, BW, BW),
+      new THREE.MeshStandardMaterial({ color: 0xffb347, emissive: 0x6b3d00, emissiveIntensity: 0.6, roughness: 0.35, metalness: 0.5 })
+    );
+    group.add(block);
+
+    const gravityArrow = tag(new THREE.ArrowHelper(new THREE.Vector3(0, -1, 0), new THREE.Vector3(), 3, 0xff5c5c, 0.7, 0.4), 'vector');
+    const frictionArrow = tag(new THREE.ArrowHelper(new THREE.Vector3(-1, 0, 0), new THREE.Vector3(), 3, 0xffc857, 0.7, 0.4), 'vector');
+    const normalArrow = tag(new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), new THREE.Vector3(), 3, 0x5cffb8, 0.7, 0.4), 'vector');
+    group.add(gravityArrow, frictionArrow, normalArrow);
+
+    let s = LEN / 2 - 1.5;
+    let v = 0;
+    function reset() { s = LEN / 2 - 1.5; v = 0; }
+    reset();
+
+    return {
+      onChange: reset,
+      update(dt) {
+        const th = p.ang * Math.PI / 180;
+        const sinT = Math.sin(th), cosT = Math.cos(th);
+
+        /* Physics: a = g(sinθ − μcosθ) */
+        const gAccel = G * (sinT - p.mu * cosT);
+
+        /* Rest condition: if at rest and static friction exceeds gravity, don't move */
+        if (Math.abs(v) < 0.02 && Math.abs(gAccel) > 0 && Math.sign(gAccel) > 0 === false) {
+          /* gAccel < 0 means friction holds block; stay put */
+          if (sinT - p.mu * cosT <= 0 && Math.abs(v) < 0.02) {
+            v = 0;
+          }
+        } else {
+          v += gAccel * dt;
+        }
+
+        s -= v * dt;   // s decreases as block slides down (toward the -x ramp direction)
+        const endPos = -LEN / 2 + 1.5;
+        if (s < endPos) { s = endPos; v = 0; }
+        if (s > LEN / 2 - 1.5) { s = LEN / 2 - 1.5; v = 0; }
+
+        /* Ramp pose */
+        ramp.rotation.z = th;
+
+        /* Block sits perpendicular above the ramp's surface.
+           Perpendicular distance from ramp centerline to block center = THICK/2 + BW/2. */
+        const d = THICK / 2 + BW / 2;
+        block.position.set(s * cosT - d * sinT, s * sinT + d * cosT, 0);
+        block.rotation.z = th;
+
+        /* Force arrows in world space */
+        const bpos = block.position;
+
+        gravityArrow.position.copy(bpos);
+        gravityArrow.setDirection(new THREE.Vector3(0, -1, 0));
+        const gmag = p.m * G;
+        gravityArrow.setLength(clamp(gmag * 0.13, 1.5, 6), 0.6, 0.35);
+
+        const N = p.m * G * cosT;
+        normalArrow.position.copy(bpos);
+        normalArrow.setDirection(new THREE.Vector3(-sinT, cosT, 0));
+        normalArrow.setLength(clamp(N * 0.13, 1.2, 6), 0.6, 0.35);
+
+        const fric = p.mu * N;
+        if (fric > 0.15) {
+          frictionArrow.position.copy(bpos);
+          /* Friction opposes velocity; up the slope is (+cosT, +sinT) */
+          const dirSign = v > 0.02 ? 1 : -1; // v>0 means sliding down (s decreasing), so friction up-slope
+          frictionArrow.setDirection(new THREE.Vector3(cosT * dirSign, sinT * dirSign, 0));
+          frictionArrow.setLength(clamp(fric * 0.13, 0.8, 5), 0.55, 0.3);
+        }
+      },
+      readout() {
+        const th = p.ang * Math.PI / 180;
+        const N = p.m * G * Math.cos(th);
+        const fric = p.mu * N;
+        const a = G * (Math.sin(th) - p.mu * Math.cos(th));
+        const staticHold = Math.tan(th) < p.mu;
+        return [
+          ['Normal force N', N.toFixed(1) + ' N'],
+          ['Friction force', fric.toFixed(1) + ' N'],
+          ['Acceleration a', a.toFixed(2) + ' m/s²'],
+          ['Speed', Math.abs(v).toFixed(2) + ' m/s'],
+          ['Static hold', staticHold ? 'Block stays' : 'Block slides'],
+          ['tan θ vs μ', (Math.tan(th)).toFixed(2) + ' vs ' + p.mu.toFixed(2)]
+        ];
+      }
+    };
+  }
+};
+
+const L_CIRCULAR = {
+  id: 'circular', name: 'Circular Motion', icon: '🎡', tag: 'Mechanics',
+  blurb: 'An object moving in a circle is constantly accelerating toward the center. The centripetal force required grows with the square of the speed and shrinks with radius — F = mv²/r.',
+  formula: 'a_c = v²/r        F_c = m·v²/r        T = 2πr/v',
+  view: { pos: [0, 14, 22], target: [0, 0, 0], min: 5, max: 80 },
+  params: [
+    { key: 'r', label: 'Radius', min: 2, max: 8, step: 0.1, value: 5, unit: 'm' },
+    { key: 'v', label: 'Speed', min: 1, max: 15, step: 0.2, value: 7, unit: 'm/s' },
+    { key: 'm', label: 'Mass', min: 0.5, max: 10, step: 0.1, value: 2, unit: 'kg' }
+  ],
+  build(group, p) {
+    const grid = tag(new THREE.GridHelper(40, 20, ACCENT, 0x123044), 'grid');
+    grid.position.y = -4; grid.material.transparent = true; grid.material.opacity = 0.28;
+    group.add(grid);
+
+    const ringPts = [];
+    for (let i = 0; i <= 100; i++) { const a = i / 100 * TWO_PI; ringPts.push(new THREE.Vector3(Math.cos(a), 0, Math.sin(a))); }
+    const ring = tag(new THREE.Line(new THREE.BufferGeometry().setFromPoints(ringPts), new THREE.LineBasicMaterial({ color: 0x33a9e8, transparent: true, opacity: 0.55 })), 'grid');
+    group.add(ring);
+
+    const ball = new THREE.Mesh(new THREE.SphereGeometry(0.7, 24, 18), new THREE.MeshStandardMaterial({ color: 0xffb347, emissive: 0x6b3d00, emissiveIntensity: 0.9, roughness: 0.25, metalness: 0.5 }));
+    group.add(ball);
+
+    const velArrow = tag(new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), new THREE.Vector3(), 3, 0x00e0a0, 0.8, 0.4), 'vector');
+    const forceArrow = tag(new THREE.ArrowHelper(new THREE.Vector3(-1, 0, 0), new THREE.Vector3(), 3, 0xff5c5c, 0.8, 0.4), 'vector');
+    group.add(velArrow, forceArrow);
+
+    const trailGeo = new THREE.BufferGeometry();
+    const MAX = 500;
+    const trailPos = new Float32Array(MAX * 3);
+    trailGeo.setAttribute('position', new THREE.BufferAttribute(trailPos, 3));
+    trailGeo.setDrawRange(0, 0);
+    const trail = tag(new THREE.Line(trailGeo, new THREE.LineBasicMaterial({ color: 0x33a9e8, transparent: true, opacity: 0.7 })), 'trail');
+    trail.frustumCulled = false;
+    group.add(trail);
+    let count = 0;
+    let theta = 0;
+
+    return {
+      onChange() { count = 0; trailGeo.setDrawRange(0, 0); },
+      update(dt) {
+        const w = p.v / p.r;
+        theta += w * dt;
+        const x = Math.cos(theta) * p.r, z = Math.sin(theta) * p.r;
+        ball.position.set(x, 0, z);
+
+        const tvx = -Math.sin(theta), tvz = Math.cos(theta);
+        velArrow.position.copy(ball.position);
+        velArrow.setDirection(new THREE.Vector3(tvx, 0, tvz));
+        velArrow.setLength(clamp(p.v * 0.4, 1, 5), 0.55, 0.32);
+
+        const fx = -x, fz = -z, fl = Math.hypot(fx, fz) || 1;
+        forceArrow.position.copy(ball.position);
+        forceArrow.setDirection(new THREE.Vector3(fx / fl, 0, fz / fl));
+        const Fc = p.m * p.v * p.v / p.r;
+        forceArrow.setLength(clamp(Fc * 0.05, 1, 5), 0.55, 0.32);
+
+        if (count < MAX) {
+          trailPos[count * 3] = x; trailPos[count * 3 + 1] = 0; trailPos[count * 3 + 2] = z; count++;
+        } else {
+          trailPos.copyWithin(0, 3);
+          const o = (MAX - 1) * 3;
+          trailPos[o] = x; trailPos[o + 1] = 0; trailPos[o + 2] = z;
+        }
+        trailGeo.setDrawRange(0, count);
+        trailGeo.attributes.position.needsUpdate = true;
+      },
+      readout() {
+        const T = TWO_PI * p.r / p.v;
+        return [['Period', T.toFixed(3) + ' s'], ['Angular ω', (p.v / p.r).toFixed(3) + ' rad/s'], ['Centripetal a', (p.v * p.v / p.r).toFixed(2) + ' m/s²'], ['Force F_c', (p.m * p.v * p.v / p.r).toFixed(2) + ' N']];
+      }
+    };
+  }
+};
+
+const L_OHM = {
+  id: 'ohm', name: "Ohm's Law", icon: '🔌', tag: 'Electromagnetism',
+  blurb: 'Voltage pushes current through resistance. Increase voltage and current rises proportionally; increase resistance and it falls. Power dissipated as heat is P = V·I.',
+  formula: 'V = I·R        P = V·I = I²R = V²/R',
+  view: { pos: [0, 12, 18], target: [0, -1, 0], min: 6, max: 70 },
+  params: [
+    { key: 'V', label: 'Voltage', min: 1, max: 24, step: 0.5, value: 9, unit: 'V' },
+    { key: 'R', label: 'Resistance', min: 1, max: 50, step: 0.5, value: 10, unit: 'Ω' }
+  ],
+  build(group, p) {
+    const wireMat = new THREE.MeshStandardMaterial({ color: 0x2a3d4d, roughness: 0.6, metalness: 0.6 });
+
+    const batBody = new THREE.Mesh(new THREE.BoxGeometry(3, 1.8, 1.6), new THREE.MeshStandardMaterial({ color: 0xffb347, emissive: 0x6b3d00, emissiveIntensity: 0.5, roughness: 0.4, metalness: 0.5 }));
+    batBody.position.set(-7, 0, 0); group.add(batBody);
+    const batTerm = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.6, 0.6), new THREE.MeshStandardMaterial({ color: 0xffd166, metalness: 0.9, roughness: 0.2 }));
+    batTerm.position.set(-5.5, 0.4, 0); group.add(batTerm);
+
+    const resBody = new THREE.Mesh(new THREE.BoxGeometry(3.2, 1.4, 1.4), new THREE.MeshStandardMaterial({ color: 0x8b5a3c, emissive: 0x3a1e08, emissiveIntensity: 0.6, roughness: 0.55, metalness: 0.2 }));
+    resBody.position.set(7, 0, 0); group.add(resBody);
+
+    const wirePts = [
+      new THREE.Vector3(-5.5, 0, 0),
+      new THREE.Vector3(-5.5, -3, 0),
+      new THREE.Vector3(7, -3, 0),
+      new THREE.Vector3(7, 0, 0)
+    ];
+    const wireCurve = new THREE.CatmullRomCurve3(wirePts, false, 'catmullrom', 0.02);
+    const wireGeo = new THREE.TubeGeometry(wireCurve, 80, 0.13, 10, false);
+    group.add(new THREE.Mesh(wireGeo, wireMat));
+
+    const seg = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.13, 1.4, 8), wireMat);
+    seg.position.set(6.3, -3, 0); seg.rotation.z = Math.PI / 2; group.add(seg);
+
+    const CHARGES = 24;
+    const charges = [];
+    for (let i = 0; i < CHARGES; i++) {
+      const c = new THREE.Mesh(new THREE.SphereGeometry(0.16, 12, 8), new THREE.MeshStandardMaterial({ color: 0x00e0a0, emissive: 0x00553a, emissiveIntensity: 1.5 }));
+      group.add(c);
+      charges.push({ mesh: c, t: i / CHARGES });
+    }
+    const loopLen = wireCurve.getLength();
+    const tmp = new THREE.Vector3();
+
+    return {
+      update(dt) {
+        const I = p.V / p.R;
+        const visSpeed = I * 0.3;
+        for (const c of charges) {
+          c.t = (c.t + visSpeed * dt / loopLen) % 1;
+          wireCurve.getPointAt(c.t, tmp);
+          c.mesh.position.copy(tmp);
+        }
+        const P = p.V * I;
+        const hue = clamp(P / 60, 0, 1);
+        resBody.material.emissive.setRGB(0.4 + hue * 0.6, 0.1 * (1 - hue), 0.05);
+      },
+      readout() {
+        const I = p.V / p.R;
+        const P = p.V * I;
+        return [['Current I', I.toFixed(3) + ' A'], ['Power P', P.toFixed(2) + ' W'], ['Conductance', (1 / p.R).toFixed(4) + ' S'], ['Charge flow', (I * 1).toFixed(2) + ' C/s']];
+      }
+    };
+  }
+};
+
+const L_OPTICS = {
+  id: 'optics', name: 'Reflection & Refraction', icon: '🔦', tag: 'Waves',
+  blurb: "When light hits a boundary between media, part reflects (angle in = angle out) and part refracts. Snell's law relates the angles through the refractive indices.",
+  formula: 'θ_i = θ_r        n₁·sinθ₁ = n₂·sinθ₂',
+  view: { pos: [0, 8, 22], target: [0, 0, 0], min: 5, max: 70 },
+  params: [
+    { key: 'ang', label: 'Incidence angle', min: 0, max: 85, step: 1, value: 40, unit: '°' },
+    { key: 'n2', label: 'Refractive index n₂', min: 1, max: 2.5, step: 0.05, value: 1.5, unit: '' }
+  ],
+  build(group, p) {
+    const interfaceMesh = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), new THREE.MeshStandardMaterial({ color: 0x0d2438, transparent: true, opacity: 0.4, roughness: 0.2, metalness: 0.4, side: THREE.DoubleSide }));
+    interfaceMesh.rotation.x = -Math.PI / 2;
+    group.add(interfaceMesh);
+
+    const grid = tag(new THREE.GridHelper(30, 15, ACCENT, 0x123044), 'grid');
+    grid.material.transparent = true; grid.material.opacity = 0.3;
+    group.add(grid);
+
+    const normalPts = [new THREE.Vector3(0, -10, 0), new THREE.Vector3(0, 10, 0)];
+    const normal = tag(new THREE.Line(new THREE.BufferGeometry().setFromPoints(normalPts), new THREE.LineDashedMaterial({ color: 0x8ba4ba, dashSize: 0.5, gapSize: 0.4, transparent: true, opacity: 0.6 })), 'grid');
+    normal.computeLineDistances();
+    group.add(normal);
+
+    const incidentArrow = tag(new THREE.ArrowHelper(new THREE.Vector3(1, -1, 0).normalize(), new THREE.Vector3(), 8, 0xffe066, 1.2, 0.7), 'vector');
+    const reflectedArrow = tag(new THREE.ArrowHelper(new THREE.Vector3(1, 1, 0).normalize(), new THREE.Vector3(), 8, 0x00e0a0, 1.2, 0.7), 'vector');
+    const refractedArrow = tag(new THREE.ArrowHelper(new THREE.Vector3(1, -1, 0).normalize(), new THREE.Vector3(), 8, 0x33a9e8, 1.2, 0.7), 'vector');
+    group.add(incidentArrow, reflectedArrow, refractedArrow);
+
+    const incidenceDot = new THREE.Mesh(new THREE.SphereGeometry(0.22, 14, 10), new THREE.MeshStandardMaterial({ color: 0xffe066, emissive: 0xffaa00, emissiveIntensity: 1.4 }));
+    group.add(incidenceDot);
+
+    return {
+      update() {
+        const th1 = p.ang * Math.PI / 180;
+        const sin2 = Math.sin(th1) / p.n2;
+        const th2 = Math.abs(sin2) <= 1 ? Math.asin(sin2) : NaN;
+
+        const inDir = new THREE.Vector3(Math.sin(th1), -Math.cos(th1), 0).normalize();
+        incidentArrow.position.set(-inDir.x * 8, -inDir.y * 8, 0);
+        incidentArrow.setDirection(inDir);
+        incidentArrow.setLength(8, 1.1, 0.65);
+
+        const refDir = new THREE.Vector3(Math.sin(th1), Math.cos(th1), 0).normalize();
+        reflectedArrow.position.set(0, 0, 0);
+        reflectedArrow.setDirection(refDir);
+        reflectedArrow.setLength(8, 1.1, 0.65);
+
+        if (!isNaN(th2)) {
+          const refrDir = new THREE.Vector3(Math.sin(th2), -Math.cos(th2), 0).normalize();
+          refractedArrow.position.set(0, 0, 0);
+          refractedArrow.setDirection(refrDir);
+          refractedArrow.setLength(8, 1.1, 0.65);
+          refractedArrow.visible = true;
+        } else {
+          refractedArrow.visible = false;
+        }
+        incidenceDot.position.set(0, 0, 0);
+      },
+      readout() {
+        const th1 = p.ang;
+        const sin2 = Math.sin(th1 * Math.PI / 180) / p.n2;
+        const th2 = Math.abs(sin2) <= 1 ? Math.asin(sin2) * 180 / Math.PI : null;
+        const critical = p.n2 < 1 ? Math.asin(p.n2) * 180 / Math.PI : null;
+        return [['Incident angle', th1.toFixed(1) + '°'], ['Reflected angle', th1.toFixed(1) + '°'], ['Refracted angle', th2 !== null ? th2.toFixed(1) + '°' : 'TIR'], ['Critical angle', critical !== null ? critical.toFixed(1) + '°' : '—']];
+      }
+    };
+  }
+};
+
+const L_MAGNET = {
+  id: 'magnet', name: 'Magnetic Fields', icon: '🧲', tag: 'Electromagnetism',
+  blurb: 'A bar magnet produces a dipole field. Field lines emerge from the north pole, curve through space, and enter the south pole. Compass needles align with the local field direction.',
+  formula: 'B = μ₀·m/(4π·r³)·√(1+3cos²θ)   (dipole)',
+  view: { pos: [0, 14, 26], target: [0, 0, 0], min: 6, max: 80 },
+  params: [
+    { key: 'str', label: 'Magnet strength', min: 0.2, max: 2, step: 0.05, value: 1, unit: '×' },
+    { key: 'len', label: 'Magnet length', min: 3, max: 8, step: 0.1, value: 5, unit: 'm' }
+  ],
+  build(group, p) {
+    const linesGroup = new THREE.Group(); group.add(linesGroup);
+
+    const nMat = new THREE.MeshStandardMaterial({ color: 0xff4444, emissive: 0x6b0000, emissiveIntensity: 0.9, roughness: 0.35, metalness: 0.5 });
+    const sMat = new THREE.MeshStandardMaterial({ color: 0x2f7fe8, emissive: 0x00224d, emissiveIntensity: 0.9, roughness: 0.35, metalness: 0.5 });
+    const nBox = new THREE.Mesh(new THREE.BoxGeometry(p.len / 2, 1.6, 1.6), nMat);
+    const sBox = new THREE.Mesh(new THREE.BoxGeometry(p.len / 2, 1.6, 1.6), sMat);
+    group.add(nBox, sBox);
+
+    const needles = [];
+    for (let i = 0; i < 12; i++) {
+      const g = new THREE.Group();
+      const n = new THREE.Mesh(new THREE.ConeGeometry(0.13, 0.5, 6), new THREE.MeshStandardMaterial({ color: 0xff4444, emissive: 0x6b0000, emissiveIntensity: 0.7 }));
+      n.position.y = 0.25;
+      const s = new THREE.Mesh(new THREE.ConeGeometry(0.13, 0.5, 6), new THREE.MeshStandardMaterial({ color: 0x2f7fe8, emissive: 0x00224d, emissiveIntensity: 0.7 }));
+      s.position.y = -0.25; s.rotation.z = Math.PI;
+      g.add(n, s);
+      group.add(g);
+      needles.push(g);
+    }
+
+    const samplePts = [];
+    const R1 = 6, R2 = 11;
+    for (let i = 0; i < 12; i++) {
+      const a = i / 12 * TWO_PI;
+      const r = i % 2 === 0 ? R1 : R2;
+      samplePts.push(new THREE.Vector3(Math.cos(a) * r, Math.sin(a) * r, 0));
+    }
+
+    function fieldAt(pt, out) {
+      const m = p.str * 8;
+      const L = p.len / 2;
+      const N = new THREE.Vector3(L, 0, 0);
+      const S = new THREE.Vector3(-L, 0, 0);
+      out.set(0, 0, 0);
+      for (const [pole, sign] of [[N, 1], [S, -1]]) {
+        const dx = pt.x - pole.x, dy = pt.y - pole.y, dz = pt.z - pole.z;
+        const r2 = dx * dx + dy * dy + dz * dz;
+        if (r2 < 0.05) continue;
+        const inv = sign * m / (r2 * Math.sqrt(r2));
+        out.x += dx * inv; out.y += dy * inv; out.z += dz * inv;
+      }
+      return out;
+    }
+
+    const tmpF = new THREE.Vector3();
+    const STEP = 0.4, MAX_STEPS = 340;
+
+    function trace(seed, dirSign) {
+      const pts = [seed.clone()], pt = seed.clone();
+      for (let i = 0; i < MAX_STEPS; i++) {
+        fieldAt(pt, tmpF);
+        const len = tmpF.length();
+        if (len < 1e-9) break;
+        pt.addScaledVector(tmpF, (dirSign / len) * STEP);
+        if (pt.lengthSq() > 1200) { pts.push(pt.clone()); break; }
+        pts.push(pt.clone());
+        if (Math.abs(pt.y) < 0.6 && Math.abs(pt.z) < 0.6 && Math.abs(Math.abs(pt.x) - p.len / 2) < 0.5) break;
+      }
+      return pts;
+    }
+
+    function rebuild() {
+      while (linesGroup.children.length) { const o = linesGroup.children.pop(); o.geometry.dispose(); o.material.dispose(); }
+
+      nBox.geometry.dispose(); sBox.geometry.dispose();
+      nBox.geometry = new THREE.BoxGeometry(p.len / 2, 1.6, 1.6);
+      sBox.geometry = new THREE.BoxGeometry(p.len / 2, 1.6, 1.6);
+      nBox.position.x = p.len / 4;
+      sBox.position.x = -p.len / 4;
+
+      const lineMat = new THREE.LineBasicMaterial({ color: 0x33a9e8, transparent: true, opacity: 0.55 });
+      const seeds = [];
+      const R = 1.6;
+      for (let i = 0; i < 12; i++) {
+        const a = i / 12 * TWO_PI;
+        seeds.push(new THREE.Vector3(p.len / 2, Math.cos(a) * R, Math.sin(a) * R));
+      }
+      seeds.push(new THREE.Vector3(p.len / 2 + 0.5, 0, 0));
+
+      for (const s of seeds) {
+        const pts = trace(s, 1);
+        if (pts.length < 5) continue;
+        const geo = new THREE.BufferGeometry().setFromPoints(pts);
+        linesGroup.add(new THREE.Line(geo, lineMat));
+      }
+    }
+    rebuild();
+
+    return {
+      onChange: rebuild,
+      update() {
+        const f = new THREE.Vector3();
+        needles.forEach((g, i) => {
+          const pt = samplePts[i];
+          g.position.copy(pt);
+          fieldAt(pt, f);
+          const ang = Math.atan2(f.y, f.x) - Math.PI / 2;
+          g.rotation.z = ang;
+        });
+      },
+      readout() {
+        return [['Strength', p.str.toFixed(2) + '×'], ['Length', p.len.toFixed(1) + ' m'], ['Poles', 'N / S dipole'], ['Field lines', 'Emerging N → entering S']];
+      }
+    };
+  }
+};
+
+const L_DOPPLER = {
+  id: 'doppler', name: 'Doppler Effect', icon: '📡', tag: 'Waves',
+  blurb: "A moving wave source compresses waves in front and stretches them behind. An observer ahead hears a higher pitch; behind, a lower one. This is the Doppler shift.",
+  formula: "f' = f·(v ± v_o)/(v ∓ v_s)",
+  view: { pos: [0, 16, 26], target: [0, 0, 0], min: 6, max: 90 },
+  params: [
+    { key: 'freq', label: 'Source frequency', min: 0.3, max: 2, step: 0.05, value: 0.9, unit: 'Hz' },
+    { key: 'vs', label: 'Source speed', min: 0, max: 8, step: 0.1, value: 3, unit: 'm/s' },
+    { key: 'vw', label: 'Wave speed', min: 2, max: 15, step: 0.5, value: 6, unit: 'm/s' }
+  ],
+  build(group, p) {
+    const grid = tag(new THREE.GridHelper(60, 30, ACCENT, 0x123044), 'grid');
+    grid.position.y = -6; grid.material.transparent = true; grid.material.opacity = 0.22;
+    group.add(grid);
+
+    const source = new THREE.Mesh(new THREE.SphereGeometry(0.8, 20, 14), new THREE.MeshStandardMaterial({ color: 0xffb347, emissive: 0x6b3d00, emissiveIntensity: 1.2, roughness: 0.3, metalness: 0.5 }));
+    group.add(source);
+
+    const observer = new THREE.Mesh(new THREE.ConeGeometry(0.8, 2, 4), new THREE.MeshStandardMaterial({ color: 0x00e0a0, emissive: 0x00553a, emissiveIntensity: 1.2, roughness: 0.3 }));
+    observer.rotation.z = Math.PI;
+    observer.position.set(11, 0, 0);
+    group.add(observer);
+
+    const rings = [];
+    const MAX_RINGS = 30;
+    for (let i = 0; i < MAX_RINGS; i++) {
+      const ring = new THREE.Mesh(
+        new THREE.TorusGeometry(1, 0.09, 6, 40),
+        new THREE.MeshBasicMaterial({ color: 0x33a9e8, transparent: true, opacity: 0.5 })
+      );
+      ring.rotation.x = Math.PI / 2;
+      ring.visible = false;
+      group.add(ring);
+      rings.push({ mesh: ring, r: 0, active: false });
+    }
+
+    const range = 15;
+    let sx = -range;
+    let lastEmit = 0;
+
+    return {
+      onChange() {
+        sx = -range; lastEmit = 0;
+        rings.forEach(r => { r.active = false; r.mesh.visible = false; });
+      },
+      update(dt, elapsed) {
+        sx += p.vs * dt;
+        if (sx > range) sx = -range;
+        source.position.set(sx, 0, 0);
+
+        const interval = 1 / p.freq;
+        if (elapsed - lastEmit > interval) {
+          lastEmit = elapsed;
+          const slot = rings.find(r => !r.active);
+          if (slot) {
+            slot.active = true;
+            slot.r = 0.4;
+            slot.mesh.visible = true;
+            slot.mesh.position.set(sx, 0, 0);
+            slot.mesh.scale.setScalar(slot.r);
+          }
+        }
+
+        for (const r of rings) {
+          if (!r.active) continue;
+          r.r += p.vw * dt;
+          r.mesh.scale.setScalar(r.r);
+          r.mesh.material.opacity = Math.max(0, 0.6 * (1 - r.r / 22));
+          if (r.r > 22) { r.active = false; r.mesh.visible = false; }
+        }
+      },
+      readout() {
+        const vw = p.vw, vs = p.vs;
+        const fObsFwd = p.freq * vw / Math.max(0.1, vw - vs);
+        const fObsBack = p.freq * vw / Math.max(0.1, vw + vs);
+        return [['Source freq f', p.freq.toFixed(2) + ' Hz'], ['Ahead f′', fObsFwd.toFixed(2) + ' Hz'], ['Behind f′', fObsBack.toFixed(2) + ' Hz'], ['Mach number', (vs / vw).toFixed(2)]];
+      }
+    };
+  }
+};
+
+const L_ROTATION = {
+  id: 'rotation', name: 'Rotational Motion', icon: '☸️', tag: 'Mechanics',
+  blurb: 'Torque is the rotational analogue of force. It produces angular acceleration inversely proportional to the moment of inertia — the rotational analogue of mass.',
+  formula: 'τ = I·α        I_disk = ½mR²        L = Iω',
+  view: { pos: [0, 10, 18], target: [0, 0, 0], min: 5, max: 60 },
+  params: [
+    { key: 'm', label: 'Disk mass', min: 0.5, max: 10, step: 0.1, value: 3, unit: 'kg' },
+    { key: 'R', label: 'Disk radius', min: 1, max: 5, step: 0.1, value: 3, unit: 'm' },
+    { key: 'T', label: 'Applied torque', min: 0, max: 20, step: 0.2, value: 6, unit: 'N·m' },
+    { key: 'fric', label: 'Friction torque', min: 0, max: 5, step: 0.1, value: 0.5, unit: 'N·m' }
+  ],
+  build(group, p) {
+    const grid = tag(new THREE.GridHelper(30, 15, ACCENT, 0x123044), 'grid');
+    grid.position.y = -4; grid.material.transparent = true; grid.material.opacity = 0.25;
+    group.add(grid);
+
+    const axle = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 8, 12), new THREE.MeshStandardMaterial({ color: 0x8b96a3, metalness: 0.9, roughness: 0.25 }));
+    group.add(axle);
+
+    const disk = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 0.5, 48), new THREE.MeshStandardMaterial({ color: ACCENT, emissive: 0x003a5e, emissiveIntensity: 0.6, roughness: 0.3, metalness: 0.7 }));
+    group.add(disk);
+
+    /* FIX: marker now sits on the disk rim surface, not inside it */
+    const marker = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.55, 0.9), new THREE.MeshStandardMaterial({ color: 0xffb347, emissive: 0x6b3d00, emissiveIntensity: 0.9 }));
+    group.add(marker);
+
+    let omega = 0;
+
+    return {
+      onChange() { omega = 0; },
+      update(dt) {
+        const I = 0.5 * p.m * p.R * p.R;
+        const netT = p.T - Math.sign(omega || 1) * p.fric;
+        const alpha = netT / I;
+        omega += alpha * dt;
+        if (p.T === 0 && Math.abs(omega) < 0.02) omega = 0;
+
+        disk.scale.set(p.R, 1, p.R);
+        /* Marker on top of the disk surface, at 70% of disk radius */
+        const rr = p.R * 0.7;
+        marker.position.set(Math.cos(omega) * rr, 0.5, Math.sin(omega) * rr);
+        marker.rotation.y = -omega;
+      },
+      readout() {
+        const I = 0.5 * p.m * p.R * p.R;
+        const L = I * omega;
+        const KE = 0.5 * I * omega * omega;
+        const alpha = (p.T - Math.sign(omega || 1) * p.fric) / I;
+        return [['Moment of inertia', I.toFixed(3) + ' kg·m²'], ['Angular ω', omega.toFixed(2) + ' rad/s'], ['Angular momentum L', L.toFixed(2) + ' kg·m²/s'], ['Angular accel.', alpha.toFixed(2) + ' rad/s²'], ['Rotational KE', KE.toFixed(2) + ' J']];
+      }
+    };
+  }
+};
+
+const L_GAS = {
+  id: 'gas', name: 'Ideal Gas & Heat', icon: '🔥', tag: 'Thermodynamics',
+  blurb: 'Gas particles move randomly and bounce off the walls. Temperature measures their average kinetic energy; pressure is the result of their collisions with the container.',
+  formula: 'PV = NkT        KE_avg = (3/2)kT',
+  view: { pos: [14, 10, 18], target: [0, 0, 0], min: 6, max: 70 },
+  params: [
+    { key: 'T', label: 'Temperature', min: 50, max: 800, step: 10, value: 300, unit: 'K' },
+    { key: 'N', label: 'Particle count', min: 20, max: 220, step: 5, value: 110, unit: '' },
+    { key: 'vol', label: 'Volume (box size)', min: 0.6, max: 1.6, step: 0.05, value: 1, unit: '×' }
+  ],
+  build(group, p) {
+    const BASE = 9;
+    const MAX = 220;
+
+    let boxSize = BASE * p.vol;
+    let boxGeo = new THREE.BoxGeometry(boxSize, boxSize, boxSize);
+    const boxEdges = new THREE.LineSegments(new THREE.EdgesGeometry(boxGeo), new THREE.LineBasicMaterial({ color: ACCENT, transparent: true, opacity: 0.55 }));
+    group.add(boxEdges);
+    const glass = new THREE.Mesh(boxGeo, new THREE.MeshStandardMaterial({ color: 0x0d2438, transparent: true, opacity: 0.1, roughness: 0.1, metalness: 0.4, side: THREE.DoubleSide, depthWrite: false }));
+    group.add(glass);
+
+    const particles = [];
+    const geoSphere = new THREE.SphereGeometry(0.24, 10, 8);
+    for (let i = 0; i < MAX; i++) {
+      const m = new THREE.Mesh(geoSphere, new THREE.MeshStandardMaterial({ color: 0xffb347, emissive: 0xaa4400, emissiveIntensity: 0.7, roughness: 0.4, metalness: 0.3 }));
+      m.visible = false;
+      group.add(m);
+      particles.push({ mesh: m, vx: 0, vy: 0, vz: 0, active: false });
+    }
+
+    const speedFromT = () => Math.sqrt(p.T) * 0.09;
+
+    /* FIX: half is computed from p.vol at call time, so it always matches current volume */
+    function currentHalf() { return BASE * p.vol / 2 - 0.4; }
+
+    function reset() {
+      const half = currentHalf();
+      const s = speedFromT();
+      for (let i = 0; i < MAX; i++) {
+        const pt = particles[i];
+        if (i < p.N) {
+          pt.active = true;
+          pt.mesh.visible = true;
+          pt.mesh.position.set((Math.random() - 0.5) * half * 2, (Math.random() - 0.5) * half * 2, (Math.random() - 0.5) * half * 2);
+          const th = Math.random() * TWO_PI, ph = Math.acos(2 * Math.random() - 1);
+          pt.vx = Math.sin(ph) * Math.cos(th) * s;
+          pt.vy = Math.sin(ph) * Math.sin(th) * s;
+          pt.vz = Math.cos(ph) * s;
+        } else {
+          pt.active = false;
+          pt.mesh.visible = false;
+        }
+      }
+    }
+    reset();
+
+    return {
+      onChange() {
+        boxSize = BASE * p.vol;
+        const newGeo = new THREE.BoxGeometry(boxSize, boxSize, boxSize);
+        boxEdges.geometry.dispose();
+        boxEdges.geometry = new THREE.EdgesGeometry(newGeo);
+        glass.geometry.dispose();
+        glass.geometry = newGeo;
+        reset();
+      },
+      update(dt) {
+        const half = currentHalf();
+        const s = speedFromT();
+        for (let i = 0; i < p.N; i++) {
+          const pt = particles[i];
+          if (!pt.active) continue;
+          const cur = Math.hypot(pt.vx, pt.vy, pt.vz);
+          if (cur > 0.001) {
+            const k = 0.96 + 0.04 * (s / cur);
+            pt.vx *= k; pt.vy *= k; pt.vz *= k;
+          }
+          let x = pt.mesh.position.x + pt.vx * dt;
+          let y = pt.mesh.position.y + pt.vy * dt;
+          let z = pt.mesh.position.z + pt.vz * dt;
+          if (x < -half) { x = -half; pt.vx = Math.abs(pt.vx); }
+          if (x > half) { x = half; pt.vx = -Math.abs(pt.vx); }
+          if (y < -half) { y = -half; pt.vy = Math.abs(pt.vy); }
+          if (y > half) { y = half; pt.vy = -Math.abs(pt.vy); }
+          if (z < -half) { z = -half; pt.vz = Math.abs(pt.vz); }
+          if (z > half) { z = half; pt.vz = -Math.abs(pt.vz); }
+          pt.mesh.position.set(x, y, z);
+        }
+      },
+      readout() {
+        const k = 1.38e-23;
+        const KE = 1.5 * k * p.T;
+        const rms = Math.sqrt(3 * k * p.T / 0.028);
+        return [['Temperature', p.T.toFixed(0) + ' K'], ['Avg KE', KE.toExponential(2) + ' J'], ['RMS speed (N₂)', (rms / 100).toFixed(1) + ' ×10² m/s'], ['Particles', p.N]];
+      }
+    };
+  }
+};
+
+const LESSONS = [
+  L_PROJECTILE, L_PENDULUM, L_WAVES, L_ORBITS, L_SPRING, L_COLLISION,
+  L_ELECTRIC, L_BUOYANCY, L_INCLINE, L_CIRCULAR, L_OHM, L_OPTICS,
+  L_MAGNET, L_DOPPLER, L_ROTATION, L_GAS
+];
+
+const CATEGORIES = ['All', 'Mechanics', 'Oscillations', 'Waves', 'Gravitation', 'Electromagnetism', 'Fluids', 'Dynamics', 'Thermodynamics'];
+
+const LS_KEY = 'physicslab3d.v3';
+let store = { favorites: [], completed: [], lastIndex: 0 };
+try {
+  const raw = localStorage.getItem(LS_KEY);
+  if (raw) store = Object.assign(store, JSON.parse(raw));
+} catch (e) {}
+function saveStore() { try { localStorage.setItem(LS_KEY, JSON.stringify(store)); } catch (e) {} }
+
+const navEl = document.getElementById('nav');
+const catsEl = document.getElementById('cats');
+const lessonCountEl = document.getElementById('lesson-count');
+let activeFilter = 'All';
+let searchQuery = '';
+
+CATEGORIES.forEach(cat => {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'chip' + (cat === 'All' ? ' active' : '');
+  b.textContent = cat;
+  b.addEventListener('click', () => {
+    activeFilter = cat;
+    catsEl.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', c === b));
+    renderNav();
+  });
+  catsEl.appendChild(b);
+});
+
+/* FIX: nav items are now divs with role="button" — nested buttons were invalid HTML */
+function renderNav() {
+  navEl.innerHTML = '';
+  const q = searchQuery.trim().toLowerCase();
+  let visible = 0, completedCount = 0;
+
+  LESSONS.forEach((L, i) => {
+    if (activeFilter !== 'All' && L.tag !== activeFilter) return;
+    if (q && !(L.name.toLowerCase().includes(q) || L.tag.toLowerCase().includes(q) || L.blurb.toLowerCase().includes(q))) return;
+    const isCompleted = store.completed.includes(L.id);
+    if (isCompleted) completedCount++;
+    if (settings.hidecompleted && isCompleted && i !== activeIndex) return;
+    visible++;
+
+    const el = document.createElement('div');
+    el.className = 'nav-item';
+    el.setAttribute('role', 'button');
+    el.setAttribute('tabindex', '0');
+
+    const isFav = store.favorites.includes(L.id);
+    el.innerHTML = `
+      <span class="nav-icon">${L.icon}</span>
+      <span class="nav-name">${L.name}</span>
+      ${isCompleted ? '<span class="nav-check">✓</span>' : ''}
+      <button class="nav-fav${isFav ? ' on' : ''}" title="Favorite" type="button" tabindex="-1">★</button>
+    `;
+
+    el.addEventListener('click', (e) => {
+      if (e.target.closest('.nav-fav')) return;
+      selectLesson(i);
+    });
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        selectLesson(i);
+      }
+    });
+
+    const favBtn = el.querySelector('.nav-fav');
+    favBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (store.favorites.includes(L.id)) store.favorites = store.favorites.filter(x => x !== L.id);
+      else store.favorites.push(L.id);
+      saveStore();
+      renderNav();
+    });
+
+    navEl.appendChild(el);
+  });
+
+  if (visible === 0) navEl.innerHTML = '<div class="nav-empty">No lessons match your filter.</div>';
+  lessonCountEl.textContent = `${completedCount}/${LESSONS.length}`;
+}
+
+const controlsEl = document.getElementById('controls');
+function renderSliders(lesson) {
+  controlsEl.innerHTML = '';
+  lesson.params.forEach(p => {
+    const row = document.createElement('div'); row.className = 'ctrl';
+    const head = document.createElement('div'); head.className = 'ctrl-head';
+    const lab = document.createElement('span'); lab.textContent = p.label;
+    const val = document.createElement('span'); val.className = 'ctrl-val';
+    head.appendChild(lab); head.appendChild(val);
+
+    const input = document.createElement('input');
+    input.type = 'range'; input.min = p.min; input.max = p.max; input.step = p.step;
+    input.value = params[p.key];
+
+    const updateVal = () => {
+      val.textContent = fmt(params[p.key]) + (p.unit ? ' ' + p.unit : '');
+      const pct = ((params[p.key] - p.min) / (p.max - p.min)) * 100;
+      input.style.setProperty('--p', pct + '%');
+    };
+    updateVal();
+
+    input.addEventListener('input', () => {
+      params[p.key] = parseFloat(input.value);
+      updateVal();
+    });
+
+    row.appendChild(head); row.appendChild(input);
+    controlsEl.appendChild(row);
+  });
+}
+
+const elTitle = document.getElementById('lesson-title');
+const elTag = document.getElementById('lesson-tag');
+const elBlurb = document.getElementById('lesson-blurb');
+const elFormula = document.getElementById('lesson-formula');
+const elReadout = document.getElementById('readout');
+
+function renderInfo(lesson) {
+  elTitle.textContent = lesson.name;
+  elTag.textContent = lesson.tag;
+  elBlurb.textContent = lesson.blurb;
+  elFormula.textContent = lesson.formula;
+  elReadout.innerHTML = '';
+}
+
+let readoutCache = '';
+function updateReadout() {
+  if (!current || !current.api || !current.api.readout) return;
+  let rows;
+  try { rows = current.api.readout(params); } catch (e) { return; }
+  if (!rows) return;
+  const html = rows.map(([k, v]) => `<div class="ro"><span class="ro-k">${k}</span><span class="ro-v">${v}</span></div>`).join('');
+  if (html !== readoutCache) { readoutCache = html; elReadout.innerHTML = html; }
+}
+
+let current = null;
+let params = {};
+let elapsed = 0;
+let lastSig = '';
+let paused = false;
+let activeIndex = -1;
+
+function loadLesson(index, pushToStore = true) {
+  const lesson = LESSONS[index];
+  if (!lesson) return;
+
+  if (current) {
+    try { current.api?.dispose?.(); } catch (e) {}
+    disposeGroup(current.group);
+    current = null;
+  }
+
+  params = {};
+  lesson.params.forEach(p => { params[p.key] = p.value; });
+
+  const group = new THREE.Group();
+  scene.add(group);
+
+  const v = lesson.view;
+  camera.position.set(v.pos[0], v.pos[1], v.pos[2]);
+  controls.target.set(v.target[0], v.target[1], v.target[2]);
+  controls.minDistance = v.min ?? 2;
+  controls.maxDistance = v.max ?? 600;
+  controls.update();
+
+  const api = lesson.build(group, params) || {};
+
+  /* FIX: organize visibility AFTER build() so all tagged objects get grouped */
+  const visGroups = organizeVisibility(group);
+  current = { lesson, group, api, visGroups, index };
+
+  renderSliders(lesson);
+  renderInfo(lesson);
+  readoutCache = '';
+  updateReadout();
+
+  elapsed = 0;
+  lastSig = lesson.params.map(p => params[p.key]).join(',');
+
+  if (pushToStore && !store.completed.includes(lesson.id)) {
+    store.completed.push(lesson.id);
+    store.lastIndex = index;
+    saveStore();
+  } else if (pushToStore) {
+    store.lastIndex = index;
+    saveStore();
+  }
+
+  activeIndex = index;
+  renderNav();
+}
+
+function selectLesson(index) {
+  if (index === activeIndex && current) return;
+  loadLesson(index);
+}
+
+function resize() {
+  const w = stageEl.clientWidth, h = stageEl.clientHeight;
+  if (w === 0 || h === 0) return;
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  renderer.setSize(w, h, false);
+}
+if (typeof ResizeObserver !== 'undefined') new ResizeObserver(resize).observe(stageEl);
+else window.addEventListener('resize', resize);
+resize();
+
+let lastTime = performance.now();
+function tick(now) {
+  const rawDt = (now - lastTime) / 1000;
+  lastTime = now;
+  const dt = Math.min(rawDt, 0.05) * settings.timeScale;
+
+  /* FIX: autospin now uses OrbitControls' built-in autoRotate */
+  controls.autoRotate = settings.autospin;
+  controls.update();
+
+  if (current) {
+    const sig = current.lesson.params.map(p => params[p.key]).join(',');
+    if (sig !== lastSig) {
+      lastSig = sig;
+      try { current.api.onChange?.(params); } catch (e) {}
+    }
+    if (!paused) {
+      elapsed += dt;
+      try { current.api.update?.(dt, elapsed, params); } catch (e) {}
+    }
+  }
+
+  renderer.render(scene, camera);
+}
+renderer.setAnimationLoop(tick);
+
+const btnPause = document.getElementById('btn-pause');
+const btnReset = document.getElementById('btn-reset');
+const btnSettings = document.getElementById('btn-settings');
+const btnHelp = document.getElementById('btn-help');
+const btnFs = document.getElementById('btn-fs');
+const drawer = document.getElementById('drawer');
+const drawerBackdrop = document.getElementById('drawer-backdrop');
+const drawerClose = document.getElementById('drawer-close');
+
+btnPause.addEventListener('click', () => {
+  paused = !paused;
+  btnPause.textContent = paused ? '▶' : '⏸';
+  btnPause.classList.toggle('active', paused);
+});
+
+btnReset.addEventListener('click', () => {
+  if (!current) return;
+  loadLesson(current.index, false);
+  paused = false;
+  btnPause.textContent = '⏸';
+  btnPause.classList.remove('active');
+});
+
+function openDrawer() { drawer.classList.add('open'); drawerBackdrop.classList.add('show'); }
+function closeDrawer() { drawer.classList.remove('open'); drawerBackdrop.classList.remove('show'); }
+btnSettings.addEventListener('click', openDrawer);
+drawerClose.addEventListener('click', closeDrawer);
+drawerBackdrop.addEventListener('click', closeDrawer);
+btnHelp.addEventListener('click', () => openModal('modal-help'));
+
+function toggleFs() {
+  if (!document.fullscreenElement) document.documentElement.requestFullscreen?.().catch(() => {});
+  else document.exitFullscreen?.();
+}
+btnFs.addEventListener('click', toggleFs);
+
+document.querySelectorAll('.toggle-row[data-set]').forEach(row => {
+  row.addEventListener('click', () => {
+    const key = row.dataset.set;
+    settings[key] = !settings[key];
+    const t = row.querySelector('.toggle');
+    t.classList.toggle('on', settings[key]);
+    applySettingsToScene();
+    if (key === 'hidecompleted') renderNav();
+  });
+});
+
+document.querySelectorAll('.speed-btn').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.speed-btn').forEach(x => x.classList.remove('on'));
+    b.classList.add('on');
+    settings.timeScale = parseFloat(b.dataset.speed);
+  });
+});
+
+document.getElementById('btn-reset-progress').addEventListener('click', () => {
+  store = { favorites: [], completed: [], lastIndex: 0 };
+  saveStore();
+  renderNav();
+  toast('Progress & favorites cleared');
+});
+
+function openModal(id) { const m = document.getElementById(id); if (m) m.classList.add('show'); }
+function closeModal(id) { const m = document.getElementById(id); if (m) m.classList.remove('show'); }
+document.querySelectorAll('[data-close]').forEach(b => {
+  b.addEventListener('click', () => closeModal(b.dataset.close));
+});
+document.querySelectorAll('.modal-backdrop').forEach(m => {
+  m.addEventListener('click', (e) => { if (e.target === m) m.classList.remove('show'); });
+});
+
+const fsGrid = document.getElementById('fs-grid');
+LESSONS.forEach((L, i) => {
+  const card = document.createElement('div');
+  card.className = 'fs-card';
+  const displayFormula = L.formula.replace(/ {3,}/g, '\n');
+  card.innerHTML = `
+    <h5><span>${L.icon}</span> ${L.name}</h5>
+    <code>${displayFormula}</code>
+    <p>${L.blurb}</p>
+  `;
+  card.addEventListener('click', () => { selectLesson(i); closeModal('modal-formula'); });
+  fsGrid.appendChild(card);
+});
+document.getElementById('open-formula').addEventListener('click', () => openModal('modal-formula'));
+
+const searchEl = document.getElementById('search');
+searchEl.addEventListener('input', () => { searchQuery = searchEl.value; renderNav(); });
+
+const toastEl = document.getElementById('toast');
+const toastText = document.getElementById('toast-text');
+let toastTimer;
+function toast(msg) {
+  toastText.textContent = msg;
+  toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2200);
+}
+
+/* FIX: Space handler no longer double-fires when a button is focused */
+window.addEventListener('keydown', e => {
+  if (e.target instanceof HTMLInputElement) {
+    if (e.key === 'Escape') e.target.blur();
+    return;
+  }
+
+  if (e.key === 'Escape') {
+    closeDrawer();
+    closeModal('modal-formula');
+    closeModal('modal-help');
+    return;
+  }
+
+  if (e.code === 'Space') {
+    /* If focus is on a button, let the browser handle it — don't double-fire */
+    const ae = document.activeElement;
+    if (ae && ae.tagName === 'BUTTON' && ae !== document.body) return;
+    e.preventDefault();
+    btnPause.click();
+    return;
+  }
+  if (e.key === 'r' || e.key === 'R') { btnReset.click(); return; }
+  if (e.key === 'f' || e.key === 'F') { toggleFs(); return; }
+  if (e.key === '?') { openModal('modal-help'); return; }
+  if (e.key === 's' || e.key === 'S') { drawer.classList.contains('open') ? closeDrawer() : openDrawer(); return; }
+  if (e.key === '/') { e.preventDefault(); searchEl.focus(); return; }
+
+  if (e.key === 'ArrowLeft') { selectLesson(Math.max(0, (activeIndex - 1 + LESSONS.length) % LESSONS.length)); return; }
+  if (e.key === 'ArrowRight') { selectLesson((activeIndex + 1) % LESSONS.length); return; }
+
+  const n = parseInt(e.key, 10);
+  if (n >= 1 && n <= 9) selectLesson(Math.min(n - 1, LESSONS.length - 1));
+  else if (e.key === '0' && LESSONS.length >= 10) selectLesson(9);
+});
+
+renderNav();
+loadLesson(store.lastIndex || 0, false);
+
+setInterval(updateReadout, 100);
+
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) lastTime = performance.now();
+});
+</script>
+</body>
+</html>
